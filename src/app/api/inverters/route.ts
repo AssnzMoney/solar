@@ -152,7 +152,7 @@ export async function GET() {
     })) || [];
 
     // 6. Consultar histórico de hoje para montar o chartData real
-    let chartData = [];
+    let chartData: { time: string; power: number }[] = [];
     const today = new Date();
     today.setHours(0,0,0,0);
     const { data: historyData, error: historyError } = await supabase
@@ -163,7 +163,7 @@ export async function GET() {
 
     if (!historyError && historyData && historyData.length > 0) {
       // Agrupar por hora (00:00, 01:00, etc)
-      const hourlyAgg = {};
+      const hourlyAgg: Record<string, { count: number, totalPower: number }> = {};
       historyData.forEach(row => {
         const date = new Date(row.created_at);
         const hour = date.getHours().toString().padStart(2, '0') + ':00';
