@@ -660,3 +660,55 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .overviewCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mainColumns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding-bottom: 70px; /* Space for mobile bottom bar */
+  }
+  
+  .main {
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .overviewCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .invertersGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .table th, .table td {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .invName {
+    font-size: 0.95rem;
+  }
+  
+  .dataCell {
+    font-size: 0.95rem;
+  }
+  
+  .chartWrapper {
+    height: 220px;
+  }
+}

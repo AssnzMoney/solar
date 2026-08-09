@@ -135,7 +135,7 @@ export default function Dashboard() {
                 <div className={styles.chartWrapper}>
                   {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                         <defs>
                           <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#24b47e" stopOpacity={0.4}>
@@ -143,13 +143,6 @@ export default function Dashboard() {
                             </stop>
                             <stop offset="95%" stopColor="#24b47e" stopOpacity={0} />
                           </linearGradient>
-                          <filter id="glow">
-                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                            <feMerge>
-                              <feMergeNode in="coloredBlur"/>
-                              <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                          </filter>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
                         <XAxis dataKey="time" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickMargin={10} />
@@ -171,7 +164,6 @@ export default function Dashboard() {
                           isAnimationActive={true}
                           animationDuration={2500}
                           animationEasing="ease-in-out"
-                          style={{ filter: 'url(#glow)' }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>

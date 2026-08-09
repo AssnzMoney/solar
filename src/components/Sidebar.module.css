@@ -143,3 +143,48 @@
   font-size: 0.75rem;
   color: #a1a1aa;
 }
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 70px;
+    flex-direction: row;
+    padding: 0;
+    z-index: 100;
+    border-right: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .brand {
+    display: none;
+  }
+  
+  .nav {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navItem {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  
+  .navItem .navLabel {
+    font-size: 0.7rem;
+    display: block;
+  }
+  
+  .sidebarFooter {
+    display: none;
+  }
+}
