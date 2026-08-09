@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [aiLogs, setAiLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState({ temp: '--', description: 'Carregando...', isDay: 1 });
 
   useEffect(() => {
     async function fetchApiData() {
@@ -58,7 +59,40 @@ export default function Dashboard() {
     fetchApiData();
     // Atualização em tempo real (polling a cada 3 segundos)
     const interval = setInterval(fetchApiData, 3000);
-    return () => clearInterval(interval);
+
+    // Buscar Clima Atual (Recife - padrão, pode ajustar a latitude e longitude depois se quiser)
+    async function fetchWeather() {
+      try {
+        const lat = -8.0539;
+        const lon = -34.8811;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data = await res.json();
+        
+        if (data.current_weather) {
+            const wmoCodes: Record<number, string> = {
+                0: 'Céu Limpo', 1: 'Maior. Limpo', 2: 'Parc. Nublado', 3: 'Nublado',
+                45: 'Nevoeiro', 48: 'Nevoeiro', 51: 'Chuvisco', 53: 'Chuvisco', 55: 'Chuvisco',
+                61: 'Chuva Leve', 63: 'Chuva Mod.', 65: 'Chuva Forte',
+                71: 'Neve', 73: 'Neve', 75: 'Neve', 95: 'Trovoada', 96: 'Trovoada', 99: 'Trovoada'
+            };
+            const desc = wmoCodes[data.current_weather.weathercode as number] || 'Variável';
+            setWeather({
+                temp: Math.round(data.current_weather.temperature).toString(),
+                description: desc,
+                isDay: data.current_weather.is_day
+            });
+        }
+      } catch (e) {
+          console.error("Erro clima", e);
+      }
+    }
+    fetchWeather();
+    const weatherInterval = setInterval(fetchWeather, 900000); // 15 mins
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(weatherInterval);
+    };
   }, []);
 
   // --- Cálculos Dinâmicos ---
@@ -101,8 +135,8 @@ export default function Dashboard() {
           <div className={styles.heroContent}>
             <div className={styles.heroTop}>
               <div className={styles.heroWeather}>
-                <Sun size={18} color="#f59e0b" />
-                <span>Dia Limpo, 26°C</span>
+                <Sun size={18} color={weather.isDay ? "#f59e0b" : "#9ca3af"} />
+                <span>{weather.description}, {weather.temp}°C</span>
               </div>
               <div className={styles.heroStatus}>
                 <span className={styles.liveIndicatorHero}>SYNC</span>
