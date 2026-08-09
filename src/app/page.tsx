@@ -94,18 +94,51 @@ export default function Dashboard() {
           </div>
         </header>
 
+        <div className={styles.heroCard}>
+          <div className={styles.heroBg}></div>
+          <div className={styles.heroOverlay}></div>
+          
+          <div className={styles.heroContent}>
+            <div className={styles.heroTop}>
+              <div className={styles.heroWeather}>
+                <Sun size={18} color="#f59e0b" />
+                <span>Dia Limpo, 26°C</span>
+              </div>
+              <div className={styles.heroStatus}>
+                <span className={styles.liveIndicatorHero}>SYNC</span>
+              </div>
+            </div>
+
+            <div className={styles.heroMain}>
+              <span className={styles.heroLabel}>
+                Potência Instantânea Total <div className={styles.infoIcon}>i</div>
+              </span>
+              <h2 className={styles.heroValue}>
+                <Zap size={32} color="#24b47e" />
+                {totalPower} <span style={{fontSize: '1.5rem', marginLeft: '4px', opacity: 0.8}}>kW</span>
+              </h2>
+            </div>
+
+            <div className={styles.heroBottom}>
+              <div className={styles.heroBottomItem}>
+                <span className={styles.heroBottomLabel}>Hoje (kWh)</span>
+                <span className={styles.heroBottomValue}>--</span>
+              </div>
+              <div className={styles.heroBottomItem}>
+                <span className={styles.heroBottomLabel}>Este Mês (kWh)</span>
+                <span className={styles.heroBottomValue}>--</span>
+              </div>
+              <div className={styles.heroBottomItem}>
+                <span className={styles.heroBottomLabel}>Total (MWh)</span>
+                <span className={styles.heroBottomValue}>--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className={styles.dashboardGrid}>
           {/* Cards Principais */}
           <div className={styles.overviewCards}>
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                Geração Total
-                <Zap size={18} className={styles.cardIconGreen} />
-              </div>
-              <div className={styles.cardValue}>{totalPower} <span className={styles.unit}>kW</span></div>
-              <div className={styles.cardTrend}>Atualizado em tempo real</div>
-            </div>
-            
             <div className={styles.card}>
               <div className={styles.cardHeader}>
                 Inversores Ativos
