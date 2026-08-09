@@ -108,6 +108,10 @@ export default function Login() {
       {/* Painel Direito (Formulário) */}
       <div className={styles.rightPanel}>
         <div className={styles.loginCard}>
+          <div className={styles.mobileBrand}>
+            <Sun size={26} className={styles.sunIcon} />
+            LacerdaSolar
+          </div>
           <h2 className={styles.cardTitle}>Acessar a conta</h2>
           <p className={styles.cardSubtitle}>Preencha suas credenciais para visualizar o painel.</p>
 

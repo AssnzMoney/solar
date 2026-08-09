@@ -283,7 +283,21 @@
   font-weight: 500;
 }
 
+.mobileBrand {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .leftPanel { display: none; }
   .rightPanel { border-left: none; }
+  .mobileBrand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #24b47e;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+  }
 }
