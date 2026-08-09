@@ -184,6 +184,7 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: all 0.3s ease;
+  min-width: 0;
 }
 
 .card:hover {
@@ -234,12 +235,14 @@
   display: grid;
   grid-template-columns: 2.8fr 1fr;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .leftCol {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .chartSection {
