@@ -29,6 +29,13 @@ export default function Login() {
     setLoading(true);
     setError("");
     
+    // Mock login bypass para testes
+    if (email === "admin@solaray.com" && password === "admin123") {
+      document.cookie = "mock_session=true; path=/; max-age=86400";
+      router.push("/");
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
