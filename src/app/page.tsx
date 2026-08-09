@@ -168,9 +168,9 @@ export default function Dashboard() {
                           strokeWidth={4}
                           fillOpacity={1} 
                           fill="url(#colorPower)" 
-                          animationBegin={300}
-                          animationDuration={2000}
-                          animationEasing="ease-out"
+                          isAnimationActive={true}
+                          animationDuration={2500}
+                          animationEasing="ease-in-out"
                           style={{ filter: 'url(#glow)' }}
                         />
                       </AreaChart>

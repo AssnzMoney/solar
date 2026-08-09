@@ -152,55 +152,29 @@ export async function GET() {
     })) || [];
 
     // 6. Consultar histórico de hoje para montar o chartData real
+    // Gera dados mockados simulando um dia de geração solar para demonstração
     let chartData: { time: string; power: number }[] = [];
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const { data: historyData, error: historyError } = await supabase
-      .from('inverters_history')
-      .select('created_at, power')
-      .gte('created_at', today.toISOString())
-      .order('created_at', { ascending: true });
-
-    if (!historyError && historyData && historyData.length > 0) {
-      // Agrupar por hora (00:00, 01:00, etc)
-      const hourlyAgg: Record<string, { count: number, totalPower: number }> = {};
-      historyData.forEach(row => {
-        const date = new Date(row.created_at);
-        const hour = date.getHours().toString().padStart(2, '0') + ':00';
-        if (!hourlyAgg[hour]) hourlyAgg[hour] = { count: 0, totalPower: 0 };
-        hourlyAgg[hour].totalPower += parseFloat(row.power);
-        hourlyAgg[hour].count += 1;
-      });
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    for (let i = 6; i <= 18; i++) {
+      if (i > currentHour) break; // Só mostra até a hora atual
       
-      chartData = Object.keys(hourlyAgg).sort().map(hour => ({
-        time: hour,
-        power: parseFloat((hourlyAgg[hour].totalPower / hourlyAgg[hour].count).toFixed(2))
-      }));
-    } else {
-      // Gera dados mockados simulando um dia de geração solar
-      const now = new Date();
-      const currentHour = now.getHours();
-      chartData = [];
+      const timeStr = `${i.toString().padStart(2, '0')}:00`;
       
-      for (let i = 6; i <= 18; i++) {
-        if (i > currentHour) break; // Só mostra até a hora atual
-        
-        const timeStr = `${i.toString().padStart(2, '0')}:00`;
-        
-        // Simula uma curva de sino, com pico ao meio-dia
-        const distance = Math.abs(12 - i);
-        let powerValue = Math.max(0, 15 - (distance * 2) + (Math.random() * 2));
-        
-        // Na hora atual, flutuações mais visíveis para parecer "ao vivo"
-        if (i === currentHour) {
-          powerValue = powerValue * 0.95 + (Math.random() * 1.5);
-        }
-        
-        chartData.push({
-          time: timeStr,
-          power: parseFloat(powerValue.toFixed(2))
-        });
+      // Simula uma curva de sino, com pico ao meio-dia
+      const distance = Math.abs(12 - i);
+      let powerValue = Math.max(0, 15 - (distance * 2) + (Math.random() * 2));
+      
+      // Na hora atual, flutuações mais visíveis para parecer "ao vivo"
+      if (i === currentHour) {
+        powerValue = powerValue * 0.95 + (Math.random() * 1.5);
       }
+      
+      chartData.push({
+        time: timeStr,
+        power: parseFloat(powerValue.toFixed(2))
+      });
     }
 
     return NextResponse.json({ inverters: invertersData, chartData });
