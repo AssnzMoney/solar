@@ -677,21 +677,30 @@
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
-    padding-bottom: 70px; /* Space for mobile bottom bar */
+    padding-bottom: 70px;
+    width: 100%;
     overflow-x: hidden;
-    width: 100vw;
   }
   
   .main {
     padding: 1rem 0.5rem;
-    overflow-x: hidden;
     width: 100%;
+    overflow-x: hidden;
+  }
+
+  .mainColumns, .leftCol, .dashboardGrid {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
   }
 
   .card {
-    padding: 1rem;
-    overflow: hidden;
+    padding: 0.75rem;
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .tableWrapper {
@@ -703,32 +712,41 @@
   .header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .pageTitle {
+    font-size: 1.25rem;
   }
   
   .overviewCards {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
   }
   
-  .invertersGrid {
-    grid-template-columns: 1fr;
+  .cardValue {
+    font-size: 1.5rem;
   }
   
   .table th, .table td {
-    padding: 0.8rem 0.5rem;
-    font-size: 0.85rem;
+    padding: 0.5rem;
+    font-size: 0.75rem;
   }
   
   .invName {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
   
   .dataCell {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
   
   .chartWrapper {
-    height: 220px;
-    margin-left: -15px; /* Adjust left margin on mobile for Recharts */
+    height: 200px;
+    width: 100%;
+    max-width: 100%;
+    margin-left: -15px;
   }
 }
