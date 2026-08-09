@@ -141,12 +141,12 @@ export default function Dashboard() {
           <div className={styles.overviewCards}>
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                Inversores Ativos
+                Usinas Ativas
                 <Activity size={18} className={styles.cardIconBlue} />
               </div>
               <div className={styles.cardValue}>{activeInverters}<span className={styles.unit}>/{totalInverters}</span></div>
               <div className={offlineInverters > 0 ? styles.cardTrendWarning : styles.cardTrend}>
-                {offlineInverters > 0 ? `${offlineInverters} Inversor(es) Offline` : 'Todos os inversores operando'}
+                {offlineInverters > 0 ? `${offlineInverters} Usina(s) Offline` : 'Todas as usinas operando'}
               </div>
             </div>
 

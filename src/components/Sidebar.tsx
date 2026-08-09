@@ -28,7 +28,7 @@ export default function Sidebar() {
         </Link>
         <Link href="/inversores" className={`${styles.navItem} ${pathname === '/inversores' ? styles.active : ''}`}>
           <Activity size={18} />
-          {!isCollapsed && <span className={styles.navLabel}>Inversores</span>}
+          {!isCollapsed && <span className={styles.navLabel}>Usinas</span>}
         </Link>
         <Link href="/alertas" className={`${styles.navItem} ${pathname === '/alertas' ? styles.active : ''}`}>
           <Cpu size={18} />
