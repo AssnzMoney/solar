@@ -360,13 +360,14 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                       <div style={{ position: 'relative', height: '220px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height={220}>
-                          <PieChart>
+                          <PieChart margin={{ top: 15, right: 15, bottom: 15, left: 15 }}>
                             <Pie
                               data={dynamicEfficiencyData}
                               cx="50%"
                               cy="50%"
-                              outerRadius={100}
-                              paddingAngle={2}
+                              innerRadius={65}
+                              outerRadius={85}
+                              paddingAngle={4}
                               dataKey="value"
                               stroke="none"
                               isAnimationActive={false}
@@ -390,19 +391,24 @@ export default function Dashboard() {
                           </PieChart>
                         </ResponsiveContainer>
                         
-                        {/* Centro do Gráfico (Oculto porque agora é Pizza sólida) */}
+                        {/* Centro do Gráfico */}
                         <div style={{
                           position: 'absolute',
-                          top: '10px',
-                          right: '10px',
-                          textAlign: 'right',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          textAlign: 'center',
                           pointerEvents: 'none',
-                          background: 'rgba(0,0,0,0.5)',
-                          padding: '4px 8px',
-                          borderRadius: '8px'
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}>
-                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: isGenerating ? '#fff' : '#71717a', lineHeight: '1' }}>
-                            {isGenerating ? `${totalPower} kW` : '0.0 kW'}
+                          <div style={{ fontSize: '1.6rem', fontWeight: '800', color: isGenerating ? '#fff' : '#71717a', lineHeight: '1' }}>
+                            {isGenerating ? `${totalPower}` : '0.0'}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>
+                            kW Total
                           </div>
                         </div>
                       </div>
@@ -450,13 +456,14 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                       <div style={{ position: 'relative', height: '220px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height={220}>
-                          <PieChart>
+                          <PieChart margin={{ top: 15, right: 15, bottom: 15, left: 15 }}>
                             <Pie
                               data={fleetStatusData}
                               cx="50%"
                               cy="50%"
-                              outerRadius={100}
-                              paddingAngle={2}
+                              innerRadius={65}
+                              outerRadius={85}
+                              paddingAngle={4}
                               dataKey="value"
                               stroke="none"
                               isAnimationActive={false}
@@ -480,16 +487,21 @@ export default function Dashboard() {
                         {/* Centro do Gráfico */}
                         <div style={{
                           position: 'absolute',
-                          top: '10px',
-                          right: '10px',
-                          textAlign: 'right',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          textAlign: 'center',
                           pointerEvents: 'none',
-                          background: 'rgba(0,0,0,0.5)',
-                          padding: '4px 8px',
-                          borderRadius: '8px'
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}>
-                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#fff', lineHeight: '1' }}>
-                            {totalInverters} Usinas
+                          <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#fff', lineHeight: '1' }}>
+                            {totalInverters}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>
+                            Total
                           </div>
                         </div>
                       </div>
