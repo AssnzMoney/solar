@@ -38,18 +38,31 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     let finalHistory = history || [];
 
     if (finalHistory.length < 2) {
-      // Se não tem histórico suficiente, pegamos a potência atual do inversor
-      const currentPower = Number(inverter.power) || 0;
-      finalHistory = [];
-      const now = new Date();
-      // Cria uma linha para a última hora a cada 10 min
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now.getTime() - i * 10 * 60000); 
-        finalHistory.push({
+      if (finalHistory.length === 1) {
+        // Preserva o único ponto existente e cria um no passado para formar a reta
+        const firstPoint = finalHistory[0];
+        const d = new Date(new Date(firstPoint.created_at).getTime() - 10 * 60000);
+        finalHistory.unshift({
           inverter_id: inverterId,
-          power: i === 0 ? parseFloat(currentPower.toFixed(2)) : 0,
+          power: 0,
           created_at: d.toISOString()
         });
+      } else {
+        // Se não tem histórico, cria uma curva suave (crescente) até a potência atual
+        const currentPower = Number(inverter.power) || 0;
+        finalHistory = [];
+        const now = new Date();
+        // Cria uma linha para a última hora a cada 10 min
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now.getTime() - i * 10 * 60000); 
+          const fraction = (6 - i) / 6;
+          const interpolatedPower = currentPower * fraction;
+          finalHistory.push({
+            inverter_id: inverterId,
+            power: parseFloat(interpolatedPower.toFixed(2)),
+            created_at: d.toISOString()
+          });
+        }
       }
     }
 
