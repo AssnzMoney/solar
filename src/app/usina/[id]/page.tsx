@@ -213,7 +213,7 @@ export default function UsinaDetails() {
                       }}
                       itemStyle={{ color: '#24b47e', fontWeight: 600 }}
                       formatter={(value: any) => [`${value} kW`, 'Potência']}
-                      labelFormatter={(label) => new Date(label).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      labelFormatter={(label) => label ? new Date(Number(label)).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
                       labelStyle={{ color: '#a1a1aa', marginBottom: '0.5rem' }}
                     />
                     <Area 

@@ -248,7 +248,7 @@ export default function Dashboard() {
                           itemStyle={{ color: '#24b47e', fontWeight: 'bold' }}
                           labelStyle={{ color: '#a1a1aa', marginBottom: '4px' }}
                           formatter={(value) => [`${value} kW`, 'Potência Gerada']}
-                          labelFormatter={(label) => new Date(label).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          labelFormatter={(label) => label ? new Date(Number(label)).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
                         />
                         <Area 
                           type="monotone" 
