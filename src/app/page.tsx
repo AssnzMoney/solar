@@ -133,53 +133,6 @@ export default function Dashboard() {
             <h1 className={styles.pageTitle}>Bem-vindo, Renato</h1>
             <Sun className={styles.animatedSun} size={28} />
           </div>
-          <div className={styles.headerActions}>
-            <div style={{ position: 'relative' }} ref={notifRef}>
-              <button 
-                className={styles.iconButton} 
-                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                onClick={() => {
-                  setIsNotificationsOpen(!isNotificationsOpen);
-                  setHasViewedNotifications(true);
-                }}
-              >
-                <Bell size={20} />
-                {aiLogs.length > 0 && !hasViewedNotifications && <span className={styles.notificationDot}></span>}
-              </button>
-              
-              {isNotificationsOpen && (
-                <div className={styles.notificationsDropdown}>
-                  <div className={styles.notificationsHeader}>
-                    Notificações IA
-                  </div>
-                  <div className={styles.notificationsBody}>
-                    {aiLogs.length === 0 ? (
-                      <div className={styles.noNotifications}>Nenhuma notificação nova</div>
-                    ) : (
-                      aiLogs.slice(0, 5).map((log, i) => (
-                        <Link href="/alertas" key={i} className={styles.notificationItem} onClick={() => setIsNotificationsOpen(false)}>
-                          <div className={`${styles.logIcon} ${styles[log.type]}`}>
-                            {log.type === 'alert' && <AlertTriangle size={14} />}
-                            {log.type === 'action' && <Cpu size={14} />}
-                            {log.type === 'success' && <CheckCircle2 size={14} />}
-                            {log.type === 'warning' && <AlertTriangle size={14} />}
-                          </div>
-                          <div className={styles.notificationText}>
-                            <p className={styles.notificationMsg}>{log.message}</p>
-                            <span className={styles.notificationTime}>{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
-                          </div>
-                        </Link>
-                      ))
-                    )}
-                  </div>
-                  <Link href="/alertas" className={styles.viewAllBtn}>
-                    Ver todos os alertas
-                  </Link>
-                </div>
-              )}
-            </div>
-            <div className={styles.userAvatar}>JD</div>
-          </div>
         </header>
 
         <div className={styles.heroCard}>
@@ -256,7 +209,7 @@ export default function Dashboard() {
                 <div className={styles.chartWrapper}>
                   {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
                         <defs>
                           <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#24b47e" stopOpacity={0.4}>
