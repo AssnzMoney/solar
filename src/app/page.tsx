@@ -343,40 +343,62 @@ export default function Dashboard() {
                 <div className={styles.sectionTitleWrapper}>
                   <h2 className={styles.sectionTitle}>Distribuição por Usina</h2>
                 </div>
-                <div style={{ flex: 1, minHeight: '220px', width: '100%', marginTop: '1rem' }}>
-                  {dynamicEfficiencyData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={dynamicEfficiencyData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                          stroke="none"
-                          animationBegin={300}
-                          animationDuration={2000}
-                          animationEasing="ease-out"
-                        >
-                          {dynamicEfficiencyData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46'}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#18181b', border: '1px solid #2a2a2a', borderRadius: '8px' }}
-                          itemStyle={{ color: '#e4e4e7' }}
-                          formatter={(value, name, props) => [isGenerating ? `${value} kW` : '0 kW (Aguardando sol)', name]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
+                <div style={{ flex: 1, minHeight: '220px', width: '100%', marginTop: '1rem', position: 'relative' }}>
+                  {loading ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#71717a' }}>
+                      <div className={styles.spinner} style={{ marginBottom: '10px' }}></div>
+                      Carregando usinas...
+                    </div>
+                  ) : dynamicEfficiencyData.length > 0 ? (
+                    <>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={dynamicEfficiencyData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={65}
+                            outerRadius={85}
+                            paddingAngle={5}
+                            dataKey="value"
+                            stroke="none"
+                            animationBegin={300}
+                            animationDuration={2000}
+                            animationEasing="ease-out"
+                          >
+                            {dynamicEfficiencyData.map((entry, index) => (
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46'}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            contentStyle={{ backgroundColor: '#18181b', border: '1px solid #2a2a2a', borderRadius: '8px' }}
+                            itemStyle={{ color: '#e4e4e7' }}
+                            formatter={(value, name, props) => [isGenerating ? `${value} kW` : '0 kW (Aguardando sol)', name]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      
+                      {/* Centro do Gráfico de Rosca */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        textAlign: 'center',
+                        pointerEvents: 'none'
+                      }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isGenerating ? '#fff' : '#71717a' }}>
+                          {isGenerating ? `${totalPower}` : '0.0'}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>kW</div>
+                      </div>
+                    </>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#71717a' }}>
-                      Sem geração no momento
+                      Sem usinas cadastradas
                     </div>
                   )}
                 </div>
