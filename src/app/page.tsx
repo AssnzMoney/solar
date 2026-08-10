@@ -358,19 +358,18 @@ export default function Dashboard() {
                     </div>
                   ) : dynamicEfficiencyData.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <div style={{ flex: 1, position: 'relative', minHeight: '200px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                      <div style={{ position: 'relative', height: '220px', width: '100%' }}>
+                        <ResponsiveContainer width="100%" height={220}>
                           <PieChart>
                             <Pie
                               data={dynamicEfficiencyData}
                               cx="50%"
                               cy="50%"
-                              innerRadius={75}
                               outerRadius={100}
-                              paddingAngle={6}
+                              paddingAngle={2}
                               dataKey="value"
                               stroke="none"
-                              isAnimationActive={false} // Evita o bug de ficar invisível no React 18
+                              isAnimationActive={false}
                             >
                               {dynamicEfficiencyData.map((entry, index) => {
                                 const color = isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46';
@@ -391,24 +390,19 @@ export default function Dashboard() {
                           </PieChart>
                         </ResponsiveContainer>
                         
-                        {/* Centro do Gráfico de Rosca */}
+                        {/* Centro do Gráfico (Oculto porque agora é Pizza sólida) */}
                         <div style={{
                           position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          textAlign: 'center',
+                          top: '10px',
+                          right: '10px',
+                          textAlign: 'right',
                           pointerEvents: 'none',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                          background: 'rgba(0,0,0,0.5)',
+                          padding: '4px 8px',
+                          borderRadius: '8px'
                         }}>
-                          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: isGenerating ? '#fff' : '#71717a', lineHeight: '1' }}>
-                            {isGenerating ? `${totalPower}` : '0.0'}
-                          </div>
-                          <div style={{ fontSize: '0.8rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px' }}>
-                            kW Total
+                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: isGenerating ? '#fff' : '#71717a', lineHeight: '1' }}>
+                            {isGenerating ? `${totalPower} kW` : '0.0 kW'}
                           </div>
                         </div>
                       </div>
@@ -454,16 +448,15 @@ export default function Dashboard() {
                     </div>
                   ) : fleetStatusData.length > 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <div style={{ flex: 1, position: 'relative', minHeight: '200px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                      <div style={{ position: 'relative', height: '220px', width: '100%' }}>
+                        <ResponsiveContainer width="100%" height={220}>
                           <PieChart>
                             <Pie
                               data={fleetStatusData}
                               cx="50%"
                               cy="50%"
-                              innerRadius={75}
                               outerRadius={100}
-                              paddingAngle={6}
+                              paddingAngle={2}
                               dataKey="value"
                               stroke="none"
                               isAnimationActive={false}
@@ -484,24 +477,19 @@ export default function Dashboard() {
                           </PieChart>
                         </ResponsiveContainer>
                         
-                        {/* Centro do Gráfico de Rosca */}
+                        {/* Centro do Gráfico */}
                         <div style={{
                           position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          textAlign: 'center',
+                          top: '10px',
+                          right: '10px',
+                          textAlign: 'right',
                           pointerEvents: 'none',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                          background: 'rgba(0,0,0,0.5)',
+                          padding: '4px 8px',
+                          borderRadius: '8px'
                         }}>
-                          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff', lineHeight: '1' }}>
-                            {totalInverters}
-                          </div>
-                          <div style={{ fontSize: '0.8rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px' }}>
-                            Total
+                          <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#fff', lineHeight: '1' }}>
+                            {totalInverters} Usinas
                           </div>
                         </div>
                       </div>
