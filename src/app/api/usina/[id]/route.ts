@@ -37,33 +37,29 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
 
     let finalHistory = history || [];
 
-    if (finalHistory.length < 2) {
-      if (finalHistory.length === 1) {
-        // Preserva o único ponto existente e cria um no passado para formar a reta
-        const firstPoint = finalHistory[0];
-        const d = new Date(new Date(firstPoint.created_at).getTime() - 10 * 60000);
-        finalHistory.unshift({
-          inverter_id: inverterId,
-          power: 0,
-          created_at: d.toISOString()
-        });
-      } else {
-        // Se não tem histórico, cria uma curva suave (crescente) até a potência atual
-        const currentPower = Number(inverter.power) || 0;
-        finalHistory = [];
-        const now = new Date();
-        // Cria uma linha para a última hora a cada 10 min
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date(now.getTime() - i * 10 * 60000); 
-          const fraction = (6 - i) / 6;
-          const interpolatedPower = currentPower * fraction;
-          finalHistory.push({
-            inverter_id: inverterId,
-            power: parseFloat(interpolatedPower.toFixed(2)),
-            created_at: d.toISOString()
-          });
-        }
-      }
+    // Adiciona o ponto em tempo real atual no gráfico
+    const currentPower = Number(inverter.power) || 0;
+    const nowTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    // Se o último ponto for no mesmo minuto, apenas atualiza
+    if (finalHistory.length > 0 && finalHistory[finalHistory.length - 1].created_at) {
+       const lastDate = new Date(finalHistory[finalHistory.length - 1].created_at);
+       const lastTimeStr = `${lastDate.getHours().toString().padStart(2, '0')}:${lastDate.getMinutes().toString().padStart(2, '0')}`;
+       if (lastTimeStr === nowTimeStr) {
+           finalHistory[finalHistory.length - 1].power = parseFloat(currentPower.toFixed(2));
+       } else {
+           finalHistory.push({
+             inverter_id: inverterId,
+             power: parseFloat(currentPower.toFixed(2)),
+             created_at: now.toISOString()
+           });
+       }
+    } else {
+       finalHistory.push({
+         inverter_id: inverterId,
+         power: parseFloat(currentPower.toFixed(2)),
+         created_at: now.toISOString()
+       });
     }
 
     return NextResponse.json({

@@ -284,38 +284,22 @@ async function fetchRealHistory(supabase: any, baseData: any) {
       }
     }
 
-    if (chartData.length < 2) {
-      if (chartData.length === 1) {
-        // Se já tem 1 ponto (ex: 1.1kW), adiciona um ponto anterior com 0 para traçar a reta
-        const firstPoint = chartData[0];
-        const d = new Date(firstPoint.timestamp - 10 * 60000);
-        chartData.unshift({
-          time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`,
-          power: 0,
-          timestamp: d.getTime()
-        });
-      } else {
-        // Se não tem histórico, cria uma curva suave (crescente) até a potência atual
-        let currentTotalPower = 0;
-        if (baseData && baseData.inverters) {
-          currentTotalPower = baseData.inverters.reduce((acc: number, inv: any) => acc + (Number(inv.power) || 0), 0);
-        }
-
-        chartData = [];
-        const now = new Date();
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date(now.getTime() - i * 10 * 60000); // Pontos a cada 10 min
-          // Simula uma subida gradual ao longo da última hora
-          const fraction = (6 - i) / 6; // i=6 -> 0, i=0 -> 1
-          const interpolatedPower = currentTotalPower * fraction;
-          
-          chartData.push({
-            time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`,
-            power: parseFloat(interpolatedPower.toFixed(2)),
-            timestamp: d.getTime()
-          });
-        }
-      }
+    // Adiciona o ponto em tempo real atual no gráfico
+    let currentTotalPower = 0;
+    if (baseData && baseData.inverters) {
+      currentTotalPower = baseData.inverters.reduce((acc: number, inv: any) => acc + (Number(inv.power) || 0), 0);
+    }
+    
+    // Para evitar duplicidade exata de minuto, checamos se o último ponto é no mesmo minuto
+    const nowTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    if (chartData.length > 0 && chartData[chartData.length - 1].time === nowTimeStr) {
+      chartData[chartData.length - 1].power = parseFloat(currentTotalPower.toFixed(2));
+    } else {
+      chartData.push({
+        time: nowTimeStr,
+        power: parseFloat(currentTotalPower.toFixed(2)),
+        timestamp: now.getTime()
+      });
     }
 
     return {
