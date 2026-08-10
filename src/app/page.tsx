@@ -117,7 +117,14 @@ export default function Dashboard() {
   const activeInverters = inverters.filter(inv => inv.status === 'online').length;
   const totalInverters = inverters.length;
   const offlineInverters = inverters.filter(inv => inv.status === 'offline').length;
+  const warningInverters = inverters.filter(inv => inv.status === 'warning').length;
   const aiActionsToday = aiLogs.length;
+
+  const fleetStatusData = [
+    { name: 'Online', value: activeInverters, color: '#24b47e' },
+    { name: 'Atenção', value: warningInverters, color: '#fbbf24' },
+    { name: 'Offline', value: offlineInverters, color: '#ef4444' }
+  ].filter(item => item.value > 0);
 
   const isGenerating = parseFloat(totalPower) > 0;
 
@@ -424,6 +431,96 @@ export default function Dashboard() {
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#71717a' }}>
+                      Sem usinas cadastradas
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Gráfico de Status da Frota */}
+              <div className={styles.card} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+                <div className={styles.sectionTitleWrapper}>
+                  <h2 className={styles.sectionTitle}>Status da Frota</h2>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: '300px', width: '100%', marginTop: '1rem', position: 'relative' }}>
+                  {loading ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#71717a' }}>
+                      <div className={styles.spinner} style={{ marginBottom: '10px' }}></div>
+                      Carregando status...
+                    </div>
+                  ) : fleetStatusData.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                      <div style={{ flex: 1, position: 'relative', minHeight: '200px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={fleetStatusData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={75}
+                              outerRadius={100}
+                              paddingAngle={6}
+                              dataKey="value"
+                              stroke="none"
+                              isAnimationActive={false}
+                            >
+                              {fleetStatusData.map((entry, index) => (
+                                <Cell 
+                                  key={`cell-${index}`} 
+                                  fill={entry.color}
+                                  style={{ filter: `drop-shadow(0px 4px 12px ${entry.color}90)`, transition: 'all 0.3s ease' }}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
+                              itemStyle={{ color: '#fff', fontWeight: 'bold' }}
+                              formatter={(value, name, props) => [`${value} Usina(s)`, name]}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        
+                        {/* Centro do Gráfico de Rosca */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          textAlign: 'center',
+                          pointerEvents: 'none',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff', lineHeight: '1' }}>
+                            {totalInverters}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px' }}>
+                            Total
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Legenda Estilizada */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.2rem', marginTop: '1.5rem', padding: '0 1rem', paddingBottom: '1rem' }}>
+                        {fleetStatusData.map((entry, index) => (
+                          <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ 
+                              width: '12px', height: '12px', borderRadius: '50%', 
+                              backgroundColor: entry.color,
+                              boxShadow: `0 0 10px ${entry.color}`
+                            }}></div>
+                            <span style={{ color: '#e4e4e7', fontSize: '0.9rem', fontWeight: 600 }}>{entry.name}</span>
+                            <span style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>
+                              {entry.value}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ) : (
