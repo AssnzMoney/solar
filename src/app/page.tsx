@@ -304,9 +304,9 @@ export default function Dashboard() {
                               {inv.status === 'offline' && 'Offline'}
                             </span>
                           </td>
-                          <td className={styles.dataCell}>{inv.power} kW</td>
-                          <td className={styles.dataCell}>{inv.voltage} V</td>
-                          <td className={styles.dataCell}>{inv.frequency} Hz</td>
+                          <td className={styles.dataCell}>{inv.power ? `${inv.power} kW` : '-- kW'}</td>
+                          <td className={styles.dataCell}>{inv.voltage ? `${inv.voltage} V` : '-- V'}</td>
+                          <td className={styles.dataCell}>{inv.frequency ? `${inv.frequency} Hz` : '-- Hz'}</td>
                         </tr>
                       ))
                     )}

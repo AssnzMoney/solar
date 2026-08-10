@@ -21,11 +21,11 @@ export default function Inversores() {
           id: inv.id,
           name: inv.plant_name || inv.plant,
           status: inv.status,
-          power: inv.power ? `${inv.power} kW` : '0 kW',
-          voltage: inv.voltage ? `${inv.voltage} V` : '0 V',
-          current: inv.current || (inv.power && inv.voltage && inv.voltage > 0 ? `${(inv.power * 1000 / inv.voltage).toFixed(1)} A` : '0 A'),
-          temperature: inv.temperature || (inv.status === 'online' && inv.power > 0 ? `${(35 + Math.random() * 15).toFixed(1)} °C` : '28.0 °C'),
-          efficiency: inv.efficiency || (inv.status === 'online' && inv.power > 0 ? '97.5 %' : '0 %'),
+          power: inv.power ? `${inv.power} kW` : '-- kW',
+          voltage: inv.voltage ? `${inv.voltage} V` : '-- V',
+          current: inv.current ? `${inv.current} A` : '-- A',
+          temperature: inv.temperature ? `${inv.temperature} ºC` : '-- ºC',
+          efficiency: inv.efficiency ? `${inv.efficiency}%` : '-- %',
           lastUpdate: inv.updated_at ? new Date(inv.updated_at).toLocaleTimeString('pt-BR') : 'Agora mesmo'
         })));
       }

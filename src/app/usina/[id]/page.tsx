@@ -41,7 +41,8 @@ export default function UsinaDetails() {
   const chartData = useMemo(() => {
     if (!history.length) return [];
     return history.map(h => ({
-      time: new Date(h.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date(h.created_at).getTime(),
+      timeStr: new Date(h.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       power: parseFloat(h.power)
     }));
   }, [history]);
@@ -184,7 +185,11 @@ export default function UsinaDetails() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                     <XAxis 
-                      dataKey="time" 
+                      dataKey="timestamp" 
+                      type="number"
+                      scale="time"
+                      domain={['dataMin', 'dataMax']}
+                      tickFormatter={(unixTime) => new Date(unixTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       stroke="#71717a" 
                       fontSize={12}
                       tickLine={false}
@@ -208,6 +213,7 @@ export default function UsinaDetails() {
                       }}
                       itemStyle={{ color: '#24b47e', fontWeight: 600 }}
                       formatter={(value: any) => [`${value} kW`, 'Potência']}
+                      labelFormatter={(label) => new Date(label).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       labelStyle={{ color: '#a1a1aa', marginBottom: '0.5rem' }}
                     />
                     <Area 
