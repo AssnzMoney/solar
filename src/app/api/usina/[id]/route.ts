@@ -35,9 +35,27 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       .gte('created_at', todayUTC.toISOString())
       .order('created_at', { ascending: true });
 
+    let finalHistory = history || [];
+
+    if (finalHistory.length < 2) {
+      // Se não tem histórico suficiente, pegamos a potência atual do inversor
+      const currentPower = Number(inverter.power) || 0;
+      finalHistory = [];
+      const now = new Date();
+      // Cria uma linha para a última hora a cada 10 min
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 10 * 60000); 
+        finalHistory.push({
+          inverter_id: inverterId,
+          power: i === 0 ? parseFloat(currentPower.toFixed(2)) : 0,
+          created_at: d.toISOString()
+        });
+      }
+    }
+
     return NextResponse.json({
       inverter,
-      history: history || []
+      history: finalHistory
     });
 
   } catch (error: any) {
