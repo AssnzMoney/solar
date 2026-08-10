@@ -1,6 +1,6 @@
 "use client";
 import styles from "./Sidebar.module.css";
-import { Sun, LayoutDashboard, Activity, Cpu, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sun, LayoutDashboard, Activity, Cpu, Settings, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -8,18 +8,35 @@ import { useState } from "react";
 export default function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
-      <div className={styles.brand}>
-        <div className={styles.brandLogo}>
-          <Sun size={26} className={styles.sunIcon} />
-          {!isCollapsed && <span className={styles.brandText}>LacerdaSolar</span>}
+    <>
+      <button 
+        className={styles.mobileMenuBtn} 
+        onClick={() => setIsMobileOpen(true)}
+      >
+        <Menu size={24} />
+      </button>
+
+      {isMobileOpen && (
+        <div className={styles.mobileOverlay} onClick={() => setIsMobileOpen(false)}></div>
+      )}
+
+      <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isMobileOpen ? styles.mobileOpen : ''}`}>
+        <div className={styles.brand}>
+          <div className={styles.brandLogo}>
+            <Sun size={26} className={styles.sunIcon} />
+            {!isCollapsed && <span className={styles.brandText}>LacerdaSolar</span>}
+          </div>
+          <button onClick={() => setIsCollapsed(!isCollapsed)} className={styles.toggleBtn}>
+            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+          
+          <button className={styles.mobileCloseBtn} onClick={() => setIsMobileOpen(false)}>
+            <X size={20} />
+          </button>
         </div>
-        <button onClick={() => setIsCollapsed(!isCollapsed)} className={styles.toggleBtn}>
-          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
-      </div>
 
       <nav className={styles.nav}>
         <Link href="/" className={`${styles.navItem} ${pathname === '/' ? styles.active : ''}`}>
@@ -48,5 +65,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }

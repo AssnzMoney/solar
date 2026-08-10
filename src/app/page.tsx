@@ -129,7 +129,10 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className={styles.main}>
         <header className={styles.header}>
-          <h1 className={styles.pageTitle}>Visão Geral das Usinas</h1>
+          <div className={styles.titleWrapper}>
+            <h1 className={styles.pageTitle}>Bem-vindo, Renato</h1>
+            <Sun className={styles.animatedSun} size={28} />
+          </div>
           <div className={styles.headerActions}>
             <div style={{ position: 'relative' }} ref={notifRef}>
               <button 
