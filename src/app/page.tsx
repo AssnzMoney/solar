@@ -12,7 +12,10 @@ import {
   Zap, 
   Cpu, 
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Search,
+  AlertCircle,
+  Leaf
 } from "lucide-react";
 import { 
   ResponsiveContainer, 
@@ -27,6 +30,7 @@ import {
   Cell
 } from "recharts";
 import { useState, useEffect, useRef } from "react";
+import { createClient } from '@/utils/supabase/client';
 
 const PIE_COLORS = ['#24b47e', '#3b82f6', '#a855f7'];
 
@@ -281,7 +285,13 @@ export default function Dashboard() {
                                 <div className={styles.invName}>{inv.plant}</div>
                               </a>
                             ) : (
-                              <div className={styles.invName}>{inv.plant}</div>
+                              <Link 
+                                href={`/usina/${inv.id}`}
+                                className={styles.invLink}
+                                title="Ver detalhes da usina"
+                              >
+                                <div className={styles.invName}>{inv.plant}</div>
+                              </Link>
                             )}
                             <div className={styles.invId} title={inv.id}>
                               {inv.id.length > 16 ? inv.id.substring(0, 14) + '...' : inv.id}
@@ -294,9 +304,9 @@ export default function Dashboard() {
                               {inv.status === 'offline' && 'Offline'}
                             </span>
                           </td>
-                          <td className={styles.dataCell}>{inv.power}</td>
-                          <td className={styles.dataCell}>{inv.voltage}</td>
-                          <td className={styles.dataCell}>{inv.frequency}</td>
+                          <td className={styles.dataCell}>{inv.power} kW</td>
+                          <td className={styles.dataCell}>{inv.voltage} V</td>
+                          <td className={styles.dataCell}>{inv.frequency} Hz</td>
                         </tr>
                       ))
                     )}

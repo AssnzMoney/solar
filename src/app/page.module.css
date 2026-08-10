@@ -1006,6 +1006,10 @@
     margin-top: 0.25rem;
   }
   
+  .titleWrapper {
+    margin-left: 40px; /* Compensação visual para o ícone do sol (28px + gap) */
+  }
+  
   .pageTitle {
     font-size: 1.15rem;
   }
