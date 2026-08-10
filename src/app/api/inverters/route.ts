@@ -5,11 +5,14 @@ export const dynamic = 'force-dynamic';
 
 const GATEWAY = "https://gateway.isolarcloud.com.hk";
 
-// Cache em memória para evitar Rate Limit (útil para o polling de 3s)
+// Variáveis de cache globais para as APIs externas
 let cachedToken = "";
 let tokenExpiration = 0;
 let cachedData: any = null;
 let dataExpiration = 0;
+
+let cachedGrowattData: any = [];
+let growattExpiration = 0;
 
 export async function GET() {
   const appKey = process.env.ISOLARCLOUD_APP_KEY;
@@ -142,29 +145,48 @@ export async function GET() {
     try {
       const growattToken = process.env.GROWATT_TOKEN;
       if (growattToken) {
-        const gwRes = await fetch("https://openapi.growatt.com/v1/plant/list", {
-          headers: {
-            "Token": growattToken
-          }
-        });
+        if (nowTime < growattExpiration && cachedGrowattData.length > 0) {
+          // Usa cache para evitar error_frequently_access
+          realInvertersData.push(...cachedGrowattData);
+        } else {
+          const gwRes = await fetch("https://openapi.growatt.com/v1/plant/list", {
+            headers: {
+              "Token": growattToken
+            }
+          });
 
-        if (gwRes.ok) {
-          const gwData = await gwRes.json();
-          const plants = gwData.data?.plants || [];
-
-          for (const p of plants) {
-            // Growatt returns current power usually as "pac" or "current_power" in strings/W
-            const rawPower = p.current_power || p.pac || "0"; 
-            const powerKw = (parseFloat(rawPower) / 1000).toFixed(1);
+          if (gwRes.ok) {
+            const gwData = await gwRes.json();
             
-            realInvertersData.push({
-              id: `GW-${p.plant_id || p.id}`,
-              plant_name: `${p.plant_name || p.name || "Usina Growatt"} (Growatt)`,
-              status: "online", // Assume online se listou
-              power: parseFloat(powerKw),
-              voltage: 0,
-              frequency: 0.0,
-            });
+            // Verifica se a API limitou nosso acesso
+            if (gwData.error_code === 10012) {
+              console.warn("Growatt API limitou o acesso (error_frequently_access). Usando dados velhos do banco se existirem.");
+              // Não joga erro, vai usar os dados antigos que já estão no Supabase
+            } else {
+              const plants = gwData.data?.plants || [];
+              const tempGwData = [];
+
+              for (const p of plants) {
+                // Growatt returns current power usually as "pac" or "current_power" in strings/W
+                const rawPower = p.current_power || p.pac || "0"; 
+                const powerKw = (parseFloat(rawPower) / 1000).toFixed(1);
+                
+                tempGwData.push({
+                  id: `GW-${p.plant_id || p.id}`,
+                  plant_name: `${p.plant_name || p.name || "Usina Growatt"} (Growatt)`,
+                  status: "online", // Assume online se listou
+                  power: parseFloat(powerKw),
+                  voltage: 0,
+                  frequency: 0.0,
+                });
+              }
+              
+              if (tempGwData.length > 0) {
+                cachedGrowattData = tempGwData;
+                growattExpiration = nowTime + (5 * 60 * 1000); // 5 minutos de cache
+                realInvertersData.push(...cachedGrowattData);
+              }
+            }
           }
         }
       }
