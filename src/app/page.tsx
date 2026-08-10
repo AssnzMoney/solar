@@ -343,59 +343,89 @@ export default function Dashboard() {
                 <div className={styles.sectionTitleWrapper}>
                   <h2 className={styles.sectionTitle}>Distribuição por Usina</h2>
                 </div>
-                <div style={{ flex: 1, minHeight: '220px', width: '100%', marginTop: '1rem', position: 'relative' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: '300px', width: '100%', marginTop: '1rem', position: 'relative' }}>
                   {loading ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#71717a' }}>
                       <div className={styles.spinner} style={{ marginBottom: '10px' }}></div>
                       Carregando usinas...
                     </div>
                   ) : dynamicEfficiencyData.length > 0 ? (
-                    <>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={dynamicEfficiencyData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={65}
-                            outerRadius={85}
-                            paddingAngle={5}
-                            dataKey="value"
-                            stroke="none"
-                            animationBegin={300}
-                            animationDuration={2000}
-                            animationEasing="ease-out"
-                          >
-                            {dynamicEfficiencyData.map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46'}
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: '#18181b', border: '1px solid #2a2a2a', borderRadius: '8px' }}
-                            itemStyle={{ color: '#e4e4e7' }}
-                            formatter={(value, name, props) => [isGenerating ? `${value} kW` : '0 kW (Aguardando sol)', name]}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      
-                      {/* Centro do Gráfico de Rosca */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        textAlign: 'center',
-                        pointerEvents: 'none'
-                      }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isGenerating ? '#fff' : '#71717a' }}>
-                          {isGenerating ? `${totalPower}` : '0.0'}
+                    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                      <div style={{ flex: 1, position: 'relative', minHeight: '200px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={dynamicEfficiencyData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={75}
+                              outerRadius={100}
+                              paddingAngle={6}
+                              dataKey="value"
+                              stroke="none"
+                              isAnimationActive={false} // Evita o bug de ficar invisível no React 18
+                            >
+                              {dynamicEfficiencyData.map((entry, index) => {
+                                const color = isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46';
+                                return (
+                                  <Cell 
+                                    key={`cell-${index}`} 
+                                    fill={color}
+                                    style={{ filter: isGenerating ? `drop-shadow(0px 4px 12px ${color}90)` : 'none', transition: 'all 0.3s ease' }}
+                                  />
+                                );
+                              })}
+                            </Pie>
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
+                              itemStyle={{ color: '#fff', fontWeight: 'bold' }}
+                              formatter={(value, name, props) => [isGenerating ? `${value} kW` : '0 kW (Aguardando)', name]}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        
+                        {/* Centro do Gráfico de Rosca */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          textAlign: 'center',
+                          pointerEvents: 'none',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: isGenerating ? '#fff' : '#71717a', lineHeight: '1' }}>
+                            {isGenerating ? `${totalPower}` : '0.0'}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px' }}>
+                            kW Total
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>kW</div>
                       </div>
-                    </>
+
+                      {/* Legenda Estilizada */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.2rem', marginTop: '1.5rem', padding: '0 1rem', paddingBottom: '1rem' }}>
+                        {dynamicEfficiencyData.map((entry, index) => {
+                          const color = isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46';
+                          return (
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                              <div style={{ 
+                                width: '12px', height: '12px', borderRadius: '50%', 
+                                backgroundColor: color,
+                                boxShadow: isGenerating ? `0 0 10px ${color}` : 'none'
+                              }}></div>
+                              <span style={{ color: '#e4e4e7', fontSize: '0.9rem', fontWeight: 600 }}>{entry.name}</span>
+                              <span style={{ color: '#a1a1aa', fontSize: '0.85rem' }}>
+                                {isGenerating ? `${entry.value} kW` : '0 kW'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#71717a' }}>
                       Sem usinas cadastradas
