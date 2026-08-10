@@ -285,14 +285,20 @@ async function fetchRealHistory(supabase: any, baseData: any) {
     }
 
     if (chartData.length < 2) {
-      // Se não tem histórico suficiente para formar uma linha, cria uma reta zerada na última hora
+      // Se não tem histórico suficiente, pegamos a potência atual dos inversores
+      let currentTotalPower = 0;
+      if (baseData && baseData.inverters) {
+        currentTotalPower = baseData.inverters.reduce((acc: number, inv: any) => acc + (Number(inv.power) || 0), 0);
+      }
+
+      // Cria uma linha zerada, mas o último ponto (agora) recebe a potência atual
       chartData = [];
       const now = new Date();
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 10 * 60000); // Pontos a cada 10 min
         chartData.push({
           time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`,
-          power: 0,
+          power: i === 0 ? parseFloat(currentTotalPower.toFixed(2)) : 0,
           timestamp: d.getTime()
         });
       }
