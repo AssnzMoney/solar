@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '../../../utils/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 const GATEWAY = "https://gateway.isolarcloud.com.hk";
 
 // Cache em memória para evitar Rate Limit (útil para o polling de 3s)

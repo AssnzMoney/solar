@@ -119,12 +119,19 @@ export default function Dashboard() {
   const offlineInverters = inverters.filter(inv => inv.status === 'offline').length;
   const aiActionsToday = aiLogs.length;
 
-  const dynamicEfficiencyData = inverters.length > 0 
+  const isGenerating = parseFloat(totalPower) > 0;
+
+  const dynamicEfficiencyData = isGenerating
     ? inverters.map(inv => ({
         name: inv.plant || 'Desconhecida',
         value: parseFloat(inv.power) || 0
       })).filter(inv => inv.value > 0)
-    : [];
+    : inverters.length > 0 
+      ? inverters.map(inv => ({
+          name: inv.plant || 'Desconhecida',
+          value: 1
+        }))
+      : [];
 
   return (
     <div className={styles.container}>
@@ -355,13 +362,14 @@ export default function Dashboard() {
                           {dynamicEfficiencyData.map((entry, index) => (
                             <Cell 
                               key={`cell-${index}`} 
-                              fill={PIE_COLORS[index % PIE_COLORS.length]}
+                              fill={isGenerating ? PIE_COLORS[index % PIE_COLORS.length] : '#3f3f46'}
                             />
                           ))}
                         </Pie>
                         <Tooltip 
                           contentStyle={{ backgroundColor: '#18181b', border: '1px solid #2a2a2a', borderRadius: '8px' }}
                           itemStyle={{ color: '#e4e4e7' }}
+                          formatter={(value, name, props) => [isGenerating ? `${value} kW` : '0 kW (Aguardando sol)', name]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
