@@ -223,7 +223,18 @@ export default function Dashboard() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                        <XAxis dataKey="time" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickMargin={10} />
+                        <XAxis 
+                          dataKey="timestamp" 
+                          type="number"
+                          scale="time"
+                          domain={['dataMin', 'dataMax']}
+                          tickFormatter={(unixTime) => new Date(unixTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          stroke="#a1a1aa" 
+                          fontSize={12} 
+                          tickLine={false} 
+                          axisLine={false} 
+                          tickMargin={10} 
+                        />
                         <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val} kW`} width={60} />
                         <Tooltip 
                           contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', color: '#fff' }}

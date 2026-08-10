@@ -230,15 +230,19 @@ export async function GET() {
 // Função para buscar dados reais do histórico no banco
 async function fetchRealHistory(supabase: any, baseData: any) {
   try {
-    // Pega o início do dia de hoje
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Pega o início do dia de hoje no fuso do Brasil (UTC-3)
+    const now = new Date();
+    const str = now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+    const brazilDate = new Date(str);
+    brazilDate.setHours(0, 0, 0, 0);
+    // Para converter o início do dia no Brasil para UTC, somamos 3 horas
+    const todayUTC = new Date(brazilDate.getTime() + (3 * 60 * 60 * 1000));
 
     // Busca os registros de histórico de hoje
     const { data: history, error } = await supabase
       .from('inverters_history')
-      .select('created_at, power')
-      .gte('created_at', today.toISOString())
+      .select('created_at, inverter_id, power')
+      .gte('created_at', todayUTC.toISOString())
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -246,8 +250,8 @@ async function fetchRealHistory(supabase: any, baseData: any) {
       return { ...baseData, chartData: [] };
     }
 
-    // Processa os dados para o formato do gráfico (time, power)
-    let chartData: { time: string; power: number }[] = [];
+    // Processa os dados para o formato do gráfico (time, power, timestamp)
+    let chartData: { time: string; power: number; timestamp: number }[] = [];
     
     if (history && history.length > 0) {
       const minutesMap = new Map<string, Map<string, number>>();
@@ -260,15 +264,21 @@ async function fetchRealHistory(supabase: any, baseData: any) {
           minutesMap.set(timeStr, new Map());
         }
         // Registra a potência de cada inversor no minuto (pega a mais recente do minuto)
+        minutesMap.get(timeStr)!.set('timestamp', date.getTime());
         minutesMap.get(timeStr)!.set(record.inverter_id, record.power || 0);
       }
 
       for (const [timeStr, invertersMap] of Array.from(minutesMap.entries())) {
         let totalPower = 0;
-        for (const pwr of Array.from(invertersMap.values())) {
-          totalPower += pwr;
+        let ts = 0;
+        for (const [key, val] of Array.from(invertersMap.entries())) {
+          if (key === 'timestamp') {
+            ts = val;
+          } else {
+            totalPower += val;
+          }
         }
-        chartData.push({ time: timeStr, power: parseFloat(totalPower.toFixed(2)) });
+        chartData.push({ time: timeStr, power: parseFloat(totalPower.toFixed(2)), timestamp: ts });
       }
     }
 
@@ -280,7 +290,8 @@ async function fetchRealHistory(supabase: any, baseData: any) {
         const d = new Date(now.getTime() - i * 10 * 60000); // Pontos a cada 10 min
         chartData.push({
           time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`,
-          power: 0
+          power: 0,
+          timestamp: d.getTime()
         });
       }
     }

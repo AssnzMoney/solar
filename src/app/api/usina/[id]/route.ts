@@ -18,15 +18,19 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: 'Usina não encontrada' }, { status: 404 });
     }
 
-    // 2. Buscar histórico de hoje (para o gráfico)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // 2. Buscar histórico de hoje (para o gráfico) - Considerando fuso do Brasil (UTC-3)
+    const now = new Date();
+    const str = now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+    const brazilDate = new Date(str);
+    brazilDate.setHours(0, 0, 0, 0);
+    // Para converter o início do dia no Brasil para UTC, somamos 3 horas
+    const todayUTC = new Date(brazilDate.getTime() + (3 * 60 * 60 * 1000));
     
     const { data: history, error: histError } = await supabase
       .from('inverters_history')
       .select('*')
       .eq('inverter_id', inverterId)
-      .gte('created_at', today.toISOString())
+      .gte('created_at', todayUTC.toISOString())
       .order('created_at', { ascending: true });
 
     return NextResponse.json({
