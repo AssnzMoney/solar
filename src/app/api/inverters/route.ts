@@ -183,7 +183,10 @@ export async function GET() {
       }, { onConflict: 'id' });
     }
 
-    // 5. Retornar os dados formatados
+    // 5. Limpar apenas o ID duplicado específico que estava causando problema
+    await supabase.from('inverters').delete().eq('id', 'SZ-27541927');
+
+    // 6. Retornar os dados formatados
     const { data: dbInverters, error } = await supabase
       .from('inverters')
       .select('*')

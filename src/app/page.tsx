@@ -330,7 +330,9 @@ export default function Dashboard() {
                             ) : (
                               <div className={styles.invName}>{inv.plant}</div>
                             )}
-                            <div className={styles.invId}>{inv.id}</div>
+                            <div className={styles.invId} title={inv.id}>
+                              {inv.id.length > 16 ? inv.id.substring(0, 14) + '...' : inv.id}
+                            </div>
                           </td>
                           <td>
                             <span className={`${styles.statusBadge} ${styles[inv.status]}`}>
