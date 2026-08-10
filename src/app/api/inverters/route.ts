@@ -173,6 +173,12 @@ export async function GET() {
     }
 
     // 4. Salvar/Atualizar no Supabase
+    const nowTimeForHistory = new Date();
+    const currentMinute = nowTimeForHistory.getMinutes();
+    const shouldSaveHistory = currentMinute % 10 === 0; // Salva a cada 10 minutos redondos (ex: 07:00, 07:10, 07:20)
+    // Para garantir que salva apenas uma vez naquele minuto, usamos um cache simples
+    let justSavedHistory = false;
+    
     for (const inv of realInvertersData) {
       await supabase.from('inverters').upsert({
         id: inv.id,
@@ -181,8 +187,22 @@ export async function GET() {
         power: inv.power,
         voltage: inv.voltage,
         frequency: inv.frequency,
-        updated_at: new Date().toISOString()
+        updated_at: nowTimeForHistory.toISOString()
       }, { onConflict: 'id' });
+
+      // Otimização: Salvar no histórico de tempos em tempos (a cada 10 min) para formar o gráfico real
+      if (shouldSaveHistory) {
+        await supabase.from('inverters_history').insert({
+          inverter_id: inv.id,
+          power: inv.power,
+          created_at: nowTimeForHistory.toISOString()
+        });
+        justSavedHistory = true;
+      }
+    }
+
+    if (justSavedHistory) {
+       console.log(`Histórico salvo às ${nowTimeForHistory.toISOString()}`);
     }
 
     // 5. Limpar apenas o ID duplicado específico que estava causando problema
