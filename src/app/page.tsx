@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./page.module.css";
+import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import { 
   Sun, 
@@ -10,7 +11,6 @@ import {
   Bell, 
   Zap, 
   Cpu, 
-  MessageCircle, 
   AlertTriangle,
   CheckCircle2
 } from "lucide-react";
@@ -26,7 +26,7 @@ import {
   Pie,
   Cell
 } from "recharts";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const PIE_COLORS = ['#24b47e', '#3b82f6', '#a855f7'];
 
@@ -36,6 +36,19 @@ export default function Dashboard() {
   const [aiLogs, setAiLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [weather, setWeather] = useState({ temp: '--', description: 'Carregando...', isDay: 1 });
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [hasViewedNotifications, setHasViewedNotifications] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     async function fetchApiData() {
@@ -118,12 +131,50 @@ export default function Dashboard() {
         <header className={styles.header}>
           <h1 className={styles.pageTitle}>Visão Geral das Usinas</h1>
           <div className={styles.headerActions}>
-            <button className={styles.iconButton}>
-              <MessageCircle size={20} />
-            </button>
-            <button className={styles.iconButton}>
-              <Bell size={20} />
-            </button>
+            <div style={{ position: 'relative' }} ref={notifRef}>
+              <button 
+                className={styles.iconButton} 
+                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onClick={() => {
+                  setIsNotificationsOpen(!isNotificationsOpen);
+                  setHasViewedNotifications(true);
+                }}
+              >
+                <Bell size={20} />
+                {aiLogs.length > 0 && !hasViewedNotifications && <span className={styles.notificationDot}></span>}
+              </button>
+              
+              {isNotificationsOpen && (
+                <div className={styles.notificationsDropdown}>
+                  <div className={styles.notificationsHeader}>
+                    Notificações IA
+                  </div>
+                  <div className={styles.notificationsBody}>
+                    {aiLogs.length === 0 ? (
+                      <div className={styles.noNotifications}>Nenhuma notificação nova</div>
+                    ) : (
+                      aiLogs.slice(0, 5).map((log, i) => (
+                        <Link href="/alertas" key={i} className={styles.notificationItem} onClick={() => setIsNotificationsOpen(false)}>
+                          <div className={`${styles.logIcon} ${styles[log.type]}`}>
+                            {log.type === 'alert' && <AlertTriangle size={14} />}
+                            {log.type === 'action' && <Cpu size={14} />}
+                            {log.type === 'success' && <CheckCircle2 size={14} />}
+                            {log.type === 'warning' && <AlertTriangle size={14} />}
+                          </div>
+                          <div className={styles.notificationText}>
+                            <p className={styles.notificationMsg}>{log.message}</p>
+                            <span className={styles.notificationTime}>{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                  <Link href="/alertas" className={styles.viewAllBtn}>
+                    Ver todos os alertas
+                  </Link>
+                </div>
+              )}
+            </div>
             <div className={styles.userAvatar}>JD</div>
           </div>
         </header>
@@ -263,7 +314,19 @@ export default function Dashboard() {
                       inverters.map(inv => (
                         <tr key={inv.id}>
                           <td>
-                            <div className={styles.invName}>{inv.plant}</div>
+                            {inv.id.startsWith('SZ-') ? (
+                              <a 
+                                href={`https://app.solarz.com.br/pages/shareable/usina/${inv.id.replace('SZ-', '')}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className={styles.invLink}
+                                title="Abrir página pública da usina na SolarZ"
+                              >
+                                <div className={styles.invName}>{inv.plant}</div>
+                              </a>
+                            ) : (
+                              <div className={styles.invName}>{inv.plant}</div>
+                            )}
                             <div className={styles.invId}>{inv.id}</div>
                           </td>
                           <td>
@@ -287,34 +350,7 @@ export default function Dashboard() {
 
             {/* Coluna da Direita */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {/* Feed da IA */}
-              <div className={`${styles.card} ${styles.aiLogSection}`}>
-                <div className={styles.sectionTitleWrapper}>
-                  <h2 className={styles.sectionTitle}>Log de Atividades IA</h2>
-                  <div className={styles.liveIndicator}>LIVE</div>
-                </div>
-                <div className={styles.logList}>
-                  {aiLogs.length === 0 ? (
-                    <div style={{color: '#71717a', fontSize: '0.9rem'}}>Nenhum evento registrado pela IA.</div>
-                  ) : (
-                    aiLogs.map((log, i) => (
-                      <div key={i} className={styles.logItem}>
-                        <div className={`${styles.logIcon} ${styles[log.type]}`}>
-                          {log.type === 'alert' && <AlertTriangle size={16} />}
-                          {log.type === 'action' && <Cpu size={16} />}
-                          {log.type === 'success' && <CheckCircle2 size={16} />}
-                          {log.type === 'info' && <MessageCircle size={16} />}
-                        </div>
-                        <div className={styles.logContent}>
-                          <p className={styles.logMsg}>{log.message}</p>
-                          <span className={styles.logTime}>{new Date(log.created_at).toLocaleTimeString('pt-BR')}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-              
+
               {/* Gráfico de Distribuição */}
               <div className={styles.card} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column' }}>
                 <div className={styles.sectionTitleWrapper}>

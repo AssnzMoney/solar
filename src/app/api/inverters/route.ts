@@ -123,7 +123,7 @@ export async function GET() {
           const statusStr = "online"; 
           
           realInvertersData.push({
-            id: `SZ-${solarzUuid.split('-')[0]}`,
+            id: `SZ-${solarzUuid}`,
             plant_name: `${plantName} (SolarZ)`,
             status: statusStr,
             power: parseFloat(powerKw),
