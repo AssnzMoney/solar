@@ -82,6 +82,11 @@ export default function Sidebar() {
 
       <div className={styles.sidebarFooter}>
         <div className={`${styles.userSection} ${isCollapsed ? styles.userCollapsed : ''}`}>
+          <div className={styles.userInfo}>
+            <div className={styles.userAvatar}>RL</div>
+            {!isCollapsed && <span className={styles.userName}>Renato Lacerda</span>}
+          </div>
+
           <div style={{ position: 'relative' }} ref={notifRef}>
             <button 
               className={styles.iconButton} 
@@ -124,11 +129,6 @@ export default function Sidebar() {
                 </Link>
               </div>
             )}
-          </div>
-          
-          <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>RL</div>
-            {!isCollapsed && <span className={styles.userName}>Renato Lacerda</span>}
           </div>
         </div>
 
