@@ -93,8 +93,9 @@ export async function GET() {
       if (statusNum === 1) statusStr = "online";
       else if (statusNum === 2) statusStr = "warning";
       
-      const powerStr = station.curr_power?.value || "0";
-      const powerKw = (parseFloat(powerStr) / 1000).toFixed(1);
+      const powerVal = parseFloat(station.curr_power?.value || "0");
+      const unit = station.curr_power?.unit || "kW";
+      const powerKw = (unit === "W" ? powerVal / 1000 : powerVal).toFixed(2);
 
       realInvertersData.push({
         id: `PS-${ps_id}`,
