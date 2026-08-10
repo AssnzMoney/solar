@@ -283,8 +283,8 @@
 .notificationsDropdown {
   position: absolute;
   bottom: 120%; /* open upwards in sidebar */
-  right: -10px;
-  width: 280px;
+  right: -20px;
+  width: 250px;
   background: #18181b;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
