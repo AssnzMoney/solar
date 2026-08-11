@@ -74,8 +74,8 @@ export default function Dashboard() {
     }
     
     fetchApiData();
-    // Atualização em tempo real (polling a cada 3 segundos)
-    const interval = setInterval(fetchApiData, 3000);
+    // Atualização em tempo real (polling a cada 1 minuto)
+    const interval = setInterval(fetchApiData, 60000);
 
     // Buscar Clima Atual (Recife - padrão, pode ajustar a latitude e longitude depois se quiser)
     async function fetchWeather() {
