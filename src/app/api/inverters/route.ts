@@ -73,7 +73,7 @@ export async function GET() {
     const stationData = await stationRes.json();
     const stations = stationData.result_data?.pageList || [];
 
-    const realInvertersData = [];
+    const realInvertersData: any[] = [];
 
     // 3. For each station, get inverter data (fallback to station data if empty)
     for (const station of stations) {
@@ -145,7 +145,7 @@ export async function GET() {
           const szData = await szRes.json();
           // For SolarZ, the generation data is scraped in the background. We just fetch the old data from DB to preserve it.
           // Read SolarZ cache
-          let szCache = {};
+          let szCache: Record<string, any> = {};
           try {
             const fs = require('fs');
             const path = require('path');
