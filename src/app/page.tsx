@@ -113,10 +113,11 @@ export default function Dashboard() {
   }, []);
 
   // --- Cálculos Dinâmicos ---
-  const totalPower = inverters.reduce((acc, inv) => acc + (parseFloat(inv.power) || 0), 0).toFixed(2);
-  const totalToday = inverters.filter(inv => !inv.id.startsWith('SZ-')).reduce((acc, inv) => acc + (parseFloat(inv.generation_today) || 0), 0).toFixed(1);
-  const totalYesterday = inverters.filter(inv => inv.id.startsWith('SZ-')).reduce((acc, inv) => acc + (parseFloat(inv.generation_today) || 0), 0).toFixed(1);
-  const totalMonth = inverters.reduce((acc, inv) => acc + (parseFloat(inv.generation_month) || 0), 0).toFixed(1);
+  const totalPowerNum = inverters.reduce((acc, inv) => acc + (parseFloat(inv.power) || 0), 0);
+  const totalPower = totalPowerNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const totalToday = inverters.filter(inv => !inv.id.startsWith('SZ-')).reduce((acc, inv) => acc + (parseFloat(inv.generation_today) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const totalYesterday = inverters.filter(inv => inv.id.startsWith('SZ-')).reduce((acc, inv) => acc + (parseFloat(inv.generation_today) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const totalMonth = inverters.reduce((acc, inv) => acc + (parseFloat(inv.generation_month) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const totalEconomyMonth = inverters.reduce((acc, inv) => acc + (parseFloat(inv.economy_month) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const activeInverters = inverters.filter(inv => inv.status === 'online').length;
@@ -131,7 +132,7 @@ export default function Dashboard() {
     { name: 'Offline', value: offlineInverters, color: '#ef4444' }
   ].filter(item => item.value > 0);
 
-  const isGenerating = parseFloat(totalPower) > 0;
+  const isGenerating = totalPowerNum > 0;
 
   const dynamicEfficiencyData = isGenerating
     ? inverters.map(inv => ({
@@ -156,6 +157,13 @@ export default function Dashboard() {
             <h1 className={styles.pageTitle}>Bem-vindo, Renato</h1>
             <Sun className={styles.animatedSun} size={28} />
           </div>
+          <a 
+            href="/api/history/download" 
+            target="_blank"
+            className={styles.downloadCsvButton}
+          >
+            Baixar Histórico (CSV)
+          </a>
         </header>
 
         <div className={styles.heroCard}>

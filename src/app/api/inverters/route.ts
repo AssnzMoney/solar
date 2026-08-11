@@ -282,7 +282,13 @@ export async function GET() {
       if (shouldSaveHistory) {
         await supabase.from('inverters_history').insert({
           inverter_id: inv.id,
+          status: inv.status,
           power: inv.power,
+          voltage: inv.voltage,
+          frequency: inv.frequency,
+          generation_today: inv.generation_today,
+          generation_month: inv.generation_month,
+          generation_total: inv.generation_total,
           created_at: nowTimeForHistory.toISOString()
         });
         justSavedHistory = true;
