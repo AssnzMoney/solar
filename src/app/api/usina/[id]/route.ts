@@ -20,6 +20,24 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: 'Usina não encontrada' }, { status: 404 });
     }
 
+    // 1.5. Fetch real-time generation from the main inverters API to enrich the response
+    try {
+      const protocol = request.headers.get('x-forwarded-proto') || 'http';
+      const host = request.headers.get('host') || 'localhost:3000';
+      const invertersRes = await fetch(`${protocol}://${host}/api/inverters`, { cache: 'no-store' });
+      if (invertersRes.ok) {
+          const data = await invertersRes.json();
+          const fullInverter = data.inverters?.find((i: any) => i.id === inverterId);
+          if (fullInverter) {
+              inverter.generation_today = fullInverter.generation_today;
+              inverter.generation_month = fullInverter.generation_month;
+              inverter.generation_total = fullInverter.generation_total;
+          }
+      }
+    } catch (err) {
+      console.warn("Could not enrich inverter data", err);
+    }
+
     // 2. Buscar histórico de hoje (para o gráfico) - Considerando fuso do Brasil (UTC-3)
     const now = new Date();
     const str = now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });

@@ -26,6 +26,10 @@ export default function Inversores() {
           current: inv.current ? `${inv.current} A` : '-- A',
           temperature: inv.temperature ? `${inv.temperature} ºC` : '-- ºC',
           efficiency: inv.efficiency ? `${inv.efficiency}%` : '-- %',
+          generation_today: inv.generation_today ?? '--',
+          generation_month: inv.generation_month ?? '--',
+          economy_month: inv.economy_month ?? '--',
+          economy_today: inv.economy_today ?? '--',
           lastUpdate: inv.updated_at ? new Date(inv.updated_at).toLocaleTimeString('pt-BR') : 'Agora mesmo'
         })));
       }
@@ -69,6 +73,14 @@ export default function Inversores() {
         </header>
 
         <section className={styles.content}>
+          <div style={{ backgroundColor: 'rgba(234, 179, 8, 0.05)', border: '1px solid rgba(234, 179, 8, 0.2)', color: '#eab308', padding: '12px 16px', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '1.2rem' }}>ℹ️</span>
+            <div>
+              <strong style={{ display: 'block', marginBottom: '0.25rem' }}>Nota sobre usinas da SolarZ</strong>
+              A plataforma SolarZ consolida a energia diária e exibe publicamente apenas os dados do dia anterior. Portanto, os cards dessas usinas exibirão <strong>"Ontem"</strong> em vez de "Hoje", enquanto a potência instantânea continua em tempo real.
+            </div>
+          </div>
+          
           <div className={styles.invertersGrid}>
             {inverters.map((inv) => (
               <div key={inv.id} className={`${styles.inverterCard} ${styles[inv.status]}`}>
@@ -93,14 +105,16 @@ export default function Inversores() {
                     <span className={styles.metricValue}>{inv.current}</span>
                   </div>
                   <div className={styles.invMetric}>
-                    <span className={styles.metricLabel}><Thermometer size={14} /> Temperatura</span>
-                    <span className={`${styles.metricValue} ${inv.temperature > '50°C' ? styles.textWarning : ''}`}>
-                      {inv.temperature}
-                    </span>
+                    <span className={styles.metricLabel}><Power size={14} /> {inv.id.startsWith('SZ-') ? 'Ontem (kWh)' : 'Hoje (kWh)'}</span>
+                    <span className={styles.metricValue}>{inv.generation_today}</span>
                   </div>
                   <div className={styles.invMetric}>
-                    <span className={styles.metricLabel}><Power size={14} /> Eficiência</span>
-                    <span className={styles.metricValue}>{inv.efficiency}</span>
+                    <span className={styles.metricLabel}><Power size={14} /> Mês (kWh)</span>
+                    <span className={styles.metricValue}>{inv.generation_month}</span>
+                  </div>
+                  <div className={styles.invMetric}>
+                    <span className={styles.metricLabel} style={{color: '#24b47e'}}>💲 Economia Mês</span>
+                    <span className={styles.metricValue} style={{color: '#24b47e'}}>R$ {inv.economy_month !== '--' ? parseFloat(inv.economy_month).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '--'}</span>
                   </div>
                 </div>
 

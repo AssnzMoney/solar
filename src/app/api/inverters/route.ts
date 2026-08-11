@@ -96,6 +96,19 @@ export async function GET() {
       const powerVal = parseFloat(station.curr_power?.value || "0");
       const unit = station.curr_power?.unit || "kW";
       const powerKw = (unit === "W" ? powerVal / 1000 : powerVal).toFixed(2);
+      
+      const todayVal = station.today_eq?.value || station.today_energy?.value || "0";
+      const monthVal = station.month_eq?.value || station.month_energy?.value || "0";
+      let totalVal = parseFloat(station.total_eq?.value || station.total_energy?.value || "0");
+      
+      // iSolarCloud returns total_energy in '万度' (10,000 kWh) for large values
+      if (station.total_energy?.unit === '万度' || station.total_eq?.unit === '万度') {
+         totalVal = totalVal * 10000;
+      }
+      
+      const todayKw = parseFloat(todayVal).toFixed(1);
+      const monthKw = parseFloat(monthVal).toFixed(1);
+      const totalKw = totalVal.toFixed(1);
 
       realInvertersData.push({
         id: `PS-${ps_id}`,
@@ -104,6 +117,14 @@ export async function GET() {
         power: parseFloat(powerKw),
         voltage: hasInverterData ? 220 : 0, 
         frequency: hasInverterData ? 60.0 : 0.0, 
+        generation_today: todayKw,
+        generation_month: monthKw,
+        generation_total: totalKw,
+        // iSolarCloud has native income
+        economy_today: parseFloat(station.today_income?.value || "0").toFixed(2),
+        economy_month: "0.00", // Month income not present, we will calculate based on tariff if missing
+        economy_total: parseFloat(station.total_income?.value || "0").toFixed(2),
+        economy_year: parseFloat(station.year_income?.value || "0").toFixed(2),
       });
     }
 
@@ -122,7 +143,20 @@ export async function GET() {
         
         if (szRes.ok) {
           const szData = await szRes.json();
+          // For SolarZ, the generation data is scraped in the background. We just fetch the old data from DB to preserve it.
+          // Read SolarZ cache
+          let szCache = {};
+          try {
+            const fs = require('fs');
+            const path = require('path');
+            const cachePath = path.join(process.cwd(), 'solarz_cache.json');
+            if (fs.existsSync(cachePath)) {
+                szCache = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+            }
+          } catch(e) {}
           
+          const oldData = szCache[`SZ-${solarzUuid}`];
+
           const plantName = szData.name || "Usina SolarZ";
           const rawPower = szData.potenciaInstantanea;
           const powerKw = rawPower ? (parseFloat(rawPower) / 1000).toFixed(1) : "0.0";
@@ -135,6 +169,9 @@ export async function GET() {
             power: parseFloat(powerKw),
             voltage: 0, 
             frequency: 0.0,
+            generation_today: oldData ? oldData.generation_today : "0.0",
+            generation_month: oldData ? oldData.generation_month : "0.0",
+            generation_total: oldData ? oldData.generation_total : "0.0",
           });
         }
       }
@@ -172,6 +209,28 @@ export async function GET() {
                 const rawPower = p.current_power || p.pac || "0"; 
                 const powerKw = (parseFloat(rawPower) / 1000).toFixed(1);
                 
+                let todayEnergy = "0.0";
+                let monthEnergy = "0.0";
+                try {
+                  const todayStr = new Date().toISOString().split('T')[0];
+                  // Fetch today
+                  const tRes = await fetch(`https://openapi.growatt.com/v1/plant/energy?plant_id=${p.plant_id || p.id}&start_date=${todayStr}&end_date=${todayStr}&time_unit=day`, { headers: { "Token": growattToken } });
+                  if (tRes.ok) {
+                    const tData = await tRes.json();
+                    if (tData.data?.energys?.length > 0) todayEnergy = tData.data.energys[0].energy;
+                  }
+                  
+                  // Fetch month
+                  const monthStart = todayStr.substring(0, 8) + '01';
+                  const mRes = await fetch(`https://openapi.growatt.com/v1/plant/energy?plant_id=${p.plant_id || p.id}&start_date=${monthStart}&end_date=${todayStr}&time_unit=month`, { headers: { "Token": growattToken } });
+                  if (mRes.ok) {
+                    const mData = await mRes.json();
+                    if (mData.data?.energys?.length > 0) monthEnergy = mData.data.energys[0].energy;
+                  }
+                } catch(e) {
+                  console.warn("Erro ao buscar energia da Growatt para", p.plant_name);
+                }
+
                 tempGwData.push({
                   id: `GW-${p.plant_id || p.id}`,
                   plant_name: `${p.plant_name || p.name || "Usina Growatt"} (Growatt)`,
@@ -179,6 +238,9 @@ export async function GET() {
                   power: parseFloat(powerKw),
                   voltage: 0,
                   frequency: 0.0,
+                  generation_today: parseFloat(todayEnergy).toFixed(1),
+                  generation_month: parseFloat(monthEnergy).toFixed(1),
+                  generation_total: parseFloat(p.e_total || p.total_energy || "0").toFixed(1),
                 });
               }
               
@@ -210,6 +272,9 @@ export async function GET() {
         power: inv.power,
         voltage: inv.voltage,
         frequency: inv.frequency,
+        generation_today: inv.generation_today,
+        generation_month: inv.generation_month,
+        generation_total: inv.generation_total,
         updated_at: nowTimeForHistory.toISOString()
       }, { onConflict: 'id' });
 
@@ -230,7 +295,7 @@ export async function GET() {
 
     // 5. Limpar apenas o ID duplicado específico que estava causando problema
     await supabase.from('inverters').delete().eq('id', 'SZ-27541927');
-
+    
     // 6. Retornar os dados formatados
     const { data: dbInverters, error } = await supabase
       .from('inverters')
@@ -242,6 +307,8 @@ export async function GET() {
     const invertersData = dbInverters?.map(inv => {
       const isOnline = inv.status === 'online';
       const isGenerating = isOnline && Number(inv.power) > 0;
+      const realInv = realInvertersData.find(r => r.id === inv.id);
+      
       return {
         id: inv.id,
         plant: inv.plant_name,
@@ -252,7 +319,13 @@ export async function GET() {
         temperature: isGenerating ? parseFloat((35 + Math.random() * 15).toFixed(1)) : parseFloat((25 + Math.random() * 5).toFixed(1)),
         current: isGenerating && Number(inv.voltage) > 0 ? parseFloat(((Number(inv.power) * 1000) / Number(inv.voltage)).toFixed(1)) : 0,
         efficiency: isGenerating ? 97.5 : 0,
-        lastUpdate: inv.updated_at
+        lastUpdate: inv.updated_at,
+        generation_today: realInv ? Number(realInv.generation_today) : 0,
+        generation_month: realInv ? Number(realInv.generation_month) : 0,
+        generation_total: realInv ? Number(realInv.generation_total) : 0,
+        economy_today: (realInv ? Number(realInv.generation_today) * 0.95 : 0).toFixed(2),
+        economy_month: (realInv ? Number(realInv.generation_month) * 0.95 : 0).toFixed(2),
+        economy_total: (realInv ? Number(realInv.generation_total) * 0.95 : 0).toFixed(2),
       };
     }) || [];
 

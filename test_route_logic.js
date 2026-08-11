@@ -27,7 +27,7 @@ async function testApiLogic() {
       body: JSON.stringify({ appkey: appKey, token: token, curPage: 1, size: 5 })
     });
     const stationData = await stationRes.json();
-    console.log("Station data:", stationData);
+    console.log('Station data:', JSON.stringify(stationData.result_data.pageList[0], null, 2));
 
   } catch (err) {
     console.error("Error:", err);

@@ -113,7 +113,12 @@ export default function Dashboard() {
   }, []);
 
   // --- Cálculos Dinâmicos ---
-  const totalPower = inverters.reduce((acc, inv) => acc + (parseFloat(inv.power) || 0), 0).toFixed(1);
+  const totalPower = inverters.reduce((acc, inv) => acc + (parseFloat(inv.power) || 0), 0).toFixed(2);
+  const totalToday = inverters.filter(inv => !inv.id.startsWith('SZ-')).reduce((acc, inv) => acc + (parseFloat(inv.generation_today) || 0), 0).toFixed(1);
+  const totalYesterday = inverters.filter(inv => inv.id.startsWith('SZ-')).reduce((acc, inv) => acc + (parseFloat(inv.generation_today) || 0), 0).toFixed(1);
+  const totalMonth = inverters.reduce((acc, inv) => acc + (parseFloat(inv.generation_month) || 0), 0).toFixed(1);
+  const totalEconomyMonth = inverters.reduce((acc, inv) => acc + (parseFloat(inv.economy_month) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   const activeInverters = inverters.filter(inv => inv.status === 'online').length;
   const totalInverters = inverters.length;
   const offlineInverters = inverters.filter(inv => inv.status === 'offline').length;
@@ -181,15 +186,19 @@ export default function Dashboard() {
             <div className={styles.heroBottom}>
               <div className={styles.heroBottomItem}>
                 <span className={styles.heroBottomLabel}>Hoje (kWh)</span>
-                <span className={styles.heroBottomValue}>--</span>
+                <span className={styles.heroBottomValue}>{totalToday}</span>
+              </div>
+              <div className={styles.heroBottomItem}>
+                <span className={styles.heroBottomLabel} style={{color: '#eab308'}}>Ontem (SolarZ)</span>
+                <span className={styles.heroBottomValue} style={{color: '#eab308'}}>{totalYesterday}</span>
               </div>
               <div className={styles.heroBottomItem}>
                 <span className={styles.heroBottomLabel}>Este Mês (kWh)</span>
-                <span className={styles.heroBottomValue}>--</span>
+                <span className={styles.heroBottomValue}>{totalMonth}</span>
               </div>
               <div className={styles.heroBottomItem}>
-                <span className={styles.heroBottomLabel}>Total (MWh)</span>
-                <span className={styles.heroBottomValue}>--</span>
+                <span className={styles.heroBottomLabel} style={{color: '#24b47e'}}>💲 Economia Mês</span>
+                <span className={styles.heroBottomValue} style={{color: '#24b47e'}}>R$ {totalEconomyMonth}</span>
               </div>
             </div>
           </div>
@@ -283,14 +292,23 @@ export default function Dashboard() {
               <div className={`${styles.card} ${styles.invertersSection}`}>
                 <h2 className={styles.sectionTitle}>Status dos Canais em Tempo Real</h2>
                 <div className={styles.tableWrapper}>
+                  <div style={{ backgroundColor: 'rgba(234, 179, 8, 0.05)', border: '1px solid rgba(234, 179, 8, 0.2)', color: '#eab308', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '1rem' }}>ℹ️</span>
+                    <div>
+                      <strong>Nota sobre usinas da SolarZ:</strong> A plataforma SolarZ fornece a energia diária consolidada, referente sempre ao dia anterior ("Ontem").
+                    </div>
+                  </div>
                   <table className={styles.table}>
                   <thead>
                     <tr>
                       <th>Usina / ID</th>
                       <th>Status</th>
                       <th>Potência</th>
+                      <th>Hoje (kWh)</th>
+                      <th>Ontem (kWh)</th>
+                      <th>Mês (kWh)</th>
                       <th>Tensão (V)</th>
-                      <th>Frequência (Hz)</th>
+                      <th>Freq (Hz)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -331,8 +349,11 @@ export default function Dashboard() {
                             </span>
                           </td>
                           <td className={styles.dataCell}>{inv.power ? `${inv.power} kW` : '-- kW'}</td>
-                          <td className={styles.dataCell}>{inv.voltage ? `${inv.voltage} V` : '-- V'}</td>
-                          <td className={styles.dataCell}>{inv.frequency ? `${inv.frequency} Hz` : '-- Hz'}</td>
+                          <td className={styles.dataCell}>{!inv.id.startsWith('SZ-') ? (inv.generation_today ?? '--') : '--'}</td>
+                          <td className={styles.dataCell}>{inv.id.startsWith('SZ-') ? (inv.generation_today ?? '--') : '--'}</td>
+                          <td className={styles.dataCell}>{inv.generation_month ?? '--'}</td>
+                          <td className={styles.dataCell}>{inv.voltage ?? '--'}</td>
+                          <td className={styles.dataCell}>{inv.frequency ?? '--'}</td>
                         </tr>
                       ))
                     )}
