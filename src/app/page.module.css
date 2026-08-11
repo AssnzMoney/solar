@@ -998,17 +998,24 @@
   }
 
   .header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
     padding-left: 0;
-    margin-top: 0.25rem;
+    margin-top: 1rem;
   }
   
   .titleWrapper {
-    margin-left: 40px; /* Compensação visual para o ícone do sol (28px + gap) */
+    justify-content: center;
+    margin-left: 0;
   }
+  
+  .downloadCsvButton {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+
   
   .pageTitle {
     font-size: 1.15rem;
