@@ -356,7 +356,7 @@ export default function Dashboard() {
                               {inv.status === 'offline' && 'Offline'}
                             </span>
                           </td>
-                          <td className={styles.dataCell}>{inv.power ? `${inv.power} kW` : '-- kW'}</td>
+                          <td className={styles.dataCell}>{inv.power !== undefined && inv.power !== null ? `${inv.power} kW` : '-- kW'}</td>
                           <td className={styles.dataCell}>{!inv.id.startsWith('SZ-') ? (inv.generation_today ?? '--') : '--'}</td>
                           <td className={styles.dataCell}>{inv.id.startsWith('SZ-') ? (inv.generation_today ?? '--') : '--'}</td>
                           <td className={styles.dataCell}>{inv.generation_month ?? '--'}</td>
