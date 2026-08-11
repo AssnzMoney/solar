@@ -160,9 +160,27 @@ export default function UsinaDetails() {
           <div className={`${styles.card} ${styles.heroCard}`}>
             <div className={styles.heroBg}></div>
             <div className={styles.heroContent}>
-              <div className={styles.heroHeader}>
-                <div className={styles.heroTitle}><Zap size={18}/> Potência Instantânea</div>
-                {isOnline && <div className={styles.liveTag}>LIVE</div>}
+              <div className={styles.heroHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <div className={styles.heroTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Zap size={18}/> {isHistorical ? 'Potência (Histórico)' : 'Potência Instantânea'}
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input 
+                    type="date" 
+                    value={selectedDate}
+                    onChange={(e) => fetchHistoricalData(e.target.value)}
+                    style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: 'rgba(0,0,0,0.4)', color: '#fff', fontSize: '14px', outline: 'none', colorScheme: 'dark', cursor: 'pointer' }}
+                  />
+                  {isHistorical && (
+                    <button 
+                      onClick={() => fetchHistoricalData('')}
+                      style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', border: 'none', backgroundColor: '#24b47e', color: '#18181b', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}
+                    >
+                      Voltar p/ Hoje
+                    </button>
+                  )}
+                  {!isHistorical && isOnline && <div className={styles.liveTag}>LIVE</div>}
+                </div>
               </div>
               <div className={styles.heroValue}>
                 {inverter.power} <span className={styles.heroUnit}>kW</span>
@@ -229,22 +247,6 @@ export default function UsinaDetails() {
               <div>
                 <h2 className={styles.chartTitle}>Curva de Geração de Energia {isHistorical ? `(Histórico: ${selectedDate})` : '(Hoje)'}</h2>
                 <span className={styles.chartSubtitle}>{isHistorical ? 'Dados extraídos do histórico para a data selecionada' : 'Acompanhamento em tempo real da produção fotovoltaica'}</span>
-              </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <input 
-                  type="date" 
-                  value={selectedDate}
-                  onChange={(e) => fetchHistoricalData(e.target.value)}
-                  style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #3f3f46', backgroundColor: '#18181b', color: '#fff', fontSize: '14px', outline: 'none' }}
-                />
-                {isHistorical && (
-                  <button 
-                    onClick={() => fetchHistoricalData('')}
-                    style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#24b47e', color: '#18181b', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}
-                  >
-                    Voltar p/ Hoje
-                  </button>
-                )}
               </div>
             </div>
             
