@@ -63,6 +63,14 @@ export async function GET() {
       return NextResponse.json(finalData);
     }
 
+    // 1.5 Fetch old DB inverters to use as fallback during API rate limits
+    const { data: dbInvertersFallback, error: dbError } = await supabase
+      .from('inverters')
+      .select('*')
+      .order('id');
+    
+    if (dbError) throw dbError;
+
 
     // 2. GET POWER STATION LIST (limit to 5)
     const stationRes = await fetch(`${GATEWAY}/openapi/getPowerStationList`, {
@@ -208,16 +216,21 @@ export async function GET() {
                 // Growatt returns current power usually as "pac" or "current_power" in strings/W
                 const rawPower = p.current_power || p.pac || "0"; 
                 const powerKw = (parseFloat(rawPower) / 1000).toFixed(1);
-                
-                let todayEnergy = "0.0";
-                let monthEnergy = "0.0";
+                const gwId = `GW-${p.plant_id || p.id}`;
+                const oldData = dbInvertersFallback?.find((inv: any) => inv.id === gwId);
+                let todayEnergy = oldData ? (oldData.generation_today || "0.0") : "0.0";
+                let monthEnergy = oldData ? (oldData.generation_month || "0.0") : "0.0";
+                let totalEnergy = p.e_total || p.total_energy || (oldData ? oldData.generation_total : "0.0");
+
                 try {
                   const todayStr = new Date().toISOString().split('T')[0];
                   // Fetch today
                   const tRes = await fetch(`https://openapi.growatt.com/v1/plant/energy?plant_id=${p.plant_id || p.id}&start_date=${todayStr}&end_date=${todayStr}&time_unit=day`, { headers: { "Token": growattToken } });
                   if (tRes.ok) {
                     const tData = await tRes.json();
-                    if (tData.data?.energys?.length > 0) todayEnergy = tData.data.energys[0].energy;
+                    if (tData.error_code === 0 && tData.data?.energys?.length > 0) {
+                        todayEnergy = tData.data.energys[0].energy;
+                    }
                   }
                   
                   // Fetch month
@@ -225,22 +238,24 @@ export async function GET() {
                   const mRes = await fetch(`https://openapi.growatt.com/v1/plant/energy?plant_id=${p.plant_id || p.id}&start_date=${monthStart}&end_date=${todayStr}&time_unit=month`, { headers: { "Token": growattToken } });
                   if (mRes.ok) {
                     const mData = await mRes.json();
-                    if (mData.data?.energys?.length > 0) monthEnergy = mData.data.energys[0].energy;
+                    if (mData.error_code === 0 && mData.data?.energys?.length > 0) {
+                        monthEnergy = mData.data.energys[0].energy;
+                    }
                   }
                 } catch(e) {
                   console.warn("Erro ao buscar energia da Growatt para", p.plant_name);
                 }
 
                 tempGwData.push({
-                  id: `GW-${p.plant_id || p.id}`,
+                  id: gwId,
                   plant_name: `${p.plant_name || p.name || "Usina Growatt"} (Growatt)`,
                   status: "online", // Assume online se listou
                   power: parseFloat(powerKw),
                   voltage: 0,
                   frequency: 0.0,
-                  generation_today: parseFloat(todayEnergy).toFixed(1),
-                  generation_month: parseFloat(monthEnergy).toFixed(1),
-                  generation_total: parseFloat(p.e_total || p.total_energy || "0").toFixed(1),
+                  generation_today: parseFloat(todayEnergy.toString()).toFixed(1),
+                  generation_month: parseFloat(monthEnergy.toString()).toFixed(1),
+                  generation_total: parseFloat(totalEnergy.toString()).toFixed(1),
                 });
               }
               
@@ -303,14 +318,15 @@ export async function GET() {
     await supabase.from('inverters').delete().eq('id', 'SZ-27541927');
     
     // 6. Retornar os dados formatados
-    const { data: dbInverters, error } = await supabase
+    // Como os dados podem ter sido atualizados, buscamos do banco novamente para refletir
+    const { data: updatedDbInverters, error } = await supabase
       .from('inverters')
       .select('*')
       .order('id');
 
     if (error) throw error;
 
-    const invertersData = dbInverters?.map(inv => {
+    const invertersData = updatedDbInverters?.map(inv => {
       const isOnline = inv.status === 'online';
       const isGenerating = isOnline && Number(inv.power) > 0;
       const realInv = realInvertersData.find(r => r.id === inv.id);
@@ -329,9 +345,9 @@ export async function GET() {
         generation_today: realInv ? Number(realInv.generation_today) : Number(inv.generation_today || 0),
         generation_month: realInv ? Number(realInv.generation_month) : Number(inv.generation_month || 0),
         generation_total: realInv ? Number(realInv.generation_total) : Number(inv.generation_total || 0),
-        economy_today: (realInv ? Number(realInv.generation_today) * 0.95 : 0).toFixed(2),
-        economy_month: (realInv ? Number(realInv.generation_month) * 0.95 : 0).toFixed(2),
-        economy_total: (realInv ? Number(realInv.generation_total) * 0.95 : 0).toFixed(2),
+        economy_today: ((realInv ? Number(realInv.generation_today) : Number(inv.generation_today || 0)) * 0.95).toFixed(2),
+        economy_month: ((realInv ? Number(realInv.generation_month) : Number(inv.generation_month || 0)) * 0.95).toFixed(2),
+        economy_total: ((realInv ? Number(realInv.generation_total) : Number(inv.generation_total || 0)) * 0.95).toFixed(2),
       };
     }) || [];
 
