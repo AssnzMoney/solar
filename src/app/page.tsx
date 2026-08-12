@@ -210,7 +210,7 @@ export default function Dashboard() {
 
             <div className={styles.heroMain}>
               <span className={styles.heroLabel}>
-                Potência Instantânea Total <div className={styles.infoIcon}>i</div>
+                {selectedDate === new Date(new Date().getTime() - (3 * 60 * 60 * 1000)).toISOString().split('T')[0] ? 'Potência Instantânea Total' : 'Potência Máxima do Dia'} <div className={styles.infoIcon}>i</div>
               </span>
               <h2 className={styles.heroValue}>
                 <Zap size={32} color="#24b47e" />

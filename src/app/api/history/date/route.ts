@@ -40,12 +40,29 @@ export async function GET(request: Request) {
     // Process chart data and find the latest snapshot for each inverter to represent the "end of day" values
     let chartData: { time: string; power: number; timestamp: number }[] = [];
     const latestSnapshotMap = new Map<string, any>();
+    const maxPowerMap = new Map<string, number>();
+    const maxGenTodayMap = new Map<string, number>();
+    const maxGenMonthMap = new Map<string, number>();
+    const maxGenTotalMap = new Map<string, number>();
     
     const minutesMap = new Map<string, Map<string, number>>();
       
     for (const record of history) {
       // Keep track of the latest record for the summary table
       latestSnapshotMap.set(record.inverter_id, record);
+
+      // Track max values
+      const currentMaxPower = maxPowerMap.get(record.inverter_id) || 0;
+      if (Number(record.power) > currentMaxPower) maxPowerMap.set(record.inverter_id, Number(record.power));
+
+      const currentMaxGenToday = maxGenTodayMap.get(record.inverter_id) || 0;
+      if (Number(record.generation_today) > currentMaxGenToday) maxGenTodayMap.set(record.inverter_id, Number(record.generation_today));
+
+      const currentMaxGenMonth = maxGenMonthMap.get(record.inverter_id) || 0;
+      if (Number(record.generation_month) > currentMaxGenMonth) maxGenMonthMap.set(record.inverter_id, Number(record.generation_month));
+
+      const currentMaxGenTotal = maxGenTotalMap.get(record.inverter_id) || 0;
+      if (Number(record.generation_total) > currentMaxGenTotal) maxGenTotalMap.set(record.inverter_id, Number(record.generation_total));
 
       // We need to convert UTC to BRT for the chart labels
       const recordDate = new Date(record.created_at);
@@ -83,19 +100,19 @@ export async function GET(request: Request) {
         id: inv.inverter_id,
         plant: plantNamesMap.get(inv.inverter_id) || inv.inverter_id,
         status: inv.status,
-        power: Number(inv.power) || 0,
+        power: maxPowerMap.get(inv.inverter_id) || 0,
         voltage: Number(inv.voltage) || 0,
         frequency: Number(inv.frequency) || 0,
         temperature: 25.0, // dummy history value
         current: 0,
         efficiency: 0,
         lastUpdate: inv.created_at,
-        generation_today: Number(inv.generation_today || 0),
-        generation_month: Number(inv.generation_month || 0),
-        generation_total: Number(inv.generation_total || 0),
-        economy_today: (Number(inv.generation_today || 0) * 0.95).toFixed(2),
-        economy_month: (Number(inv.generation_month || 0) * 0.95).toFixed(2),
-        economy_total: (Number(inv.generation_total || 0) * 0.95).toFixed(2),
+        generation_today: maxGenTodayMap.get(inv.inverter_id) || Number(inv.generation_today || 0),
+        generation_month: maxGenMonthMap.get(inv.inverter_id) || Number(inv.generation_month || 0),
+        generation_total: maxGenTotalMap.get(inv.inverter_id) || Number(inv.generation_total || 0),
+        economy_today: ((maxGenTodayMap.get(inv.inverter_id) || Number(inv.generation_today || 0)) * 0.95).toFixed(2),
+        economy_month: ((maxGenMonthMap.get(inv.inverter_id) || Number(inv.generation_month || 0)) * 0.95).toFixed(2),
+        economy_total: ((maxGenTotalMap.get(inv.inverter_id) || Number(inv.generation_total || 0)) * 0.95).toFixed(2),
       };
     });
 
