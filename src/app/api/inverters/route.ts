@@ -240,8 +240,8 @@ export async function GET() {
                   }
                   
                   // Fetch month
-                  const monthStart = todayStr.substring(0, 8) + '01';
-                  const mRes = await fetch(`https://openapi.growatt.com/v1/plant/energy?plant_id=${p.plant_id || p.id}&start_date=${monthStart}&end_date=${todayStr}&time_unit=month`, { headers: { "Token": growattToken } });
+                  const monthStart = today.substring(0, 8) + '01';
+                  const mRes = await fetch(`https://openapi.growatt.com/v1/plant/energy?plant_id=${p.plant_id || p.id}&start_date=${monthStart}&end_date=${today}&time_unit=month`, { headers: { "Token": growattToken } });
                   if (mRes.ok) {
                     const mData = await mRes.json();
                     if (mData.error_code === 0 && mData.data?.energys?.length > 0) {

@@ -44,6 +44,11 @@ export default function Dashboard() {
   const [hasViewedNotifications, setHasViewedNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const brtDate = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
+    return brtDate.toISOString().split('T')[0];
+  });
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -55,10 +60,16 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    async function fetchApiData() {
+    async function fetchApiData(dateStr = selectedDate) {
       try {
-        const response = await fetch('/api/inverters');
+        setLoading(true);
+        const brtDate = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
+        const isToday = dateStr === brtDate.toISOString().split('T')[0];
+        
+        const url = isToday ? '/api/inverters' : `/api/history/date?date=${dateStr}`;
+        const response = await fetch(url);
         const data = await response.json();
+        
         if (data.inverters) setInverters(data.inverters);
         if (data.chartData) setChartData(data.chartData);
         
@@ -67,15 +78,21 @@ export default function Dashboard() {
         const logsData = await logsRes.json();
         if (logsData.logs) setAiLogs(logsData.logs);
       } catch (error) {
-        console.error("Erro ao buscar dados da iSolarCloud:", error);
+        console.error("Erro ao buscar dados:", error);
       } finally {
         setLoading(false);
       }
     }
     
-    fetchApiData();
-    // Atualização em tempo real (polling a cada 1 minuto)
-    const interval = setInterval(fetchApiData, 60000);
+    fetchApiData(selectedDate);
+    
+    // Atualização em tempo real (polling a cada 1 minuto) apenas se for hoje
+    const interval = setInterval(() => {
+        const brtDate = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
+        if (selectedDate === brtDate.toISOString().split('T')[0]) {
+            fetchApiData(selectedDate);
+        }
+    }, 60000);
 
     // Buscar Clima Atual (Recife - padrão, pode ajustar a latitude e longitude depois se quiser)
     async function fetchWeather() {
@@ -110,7 +127,7 @@ export default function Dashboard() {
       clearInterval(interval);
       clearInterval(weatherInterval);
     };
-  }, []);
+  }, [selectedDate]);
 
   // --- Cálculos Dinâmicos ---
   const totalPowerNum = inverters.reduce((acc, inv) => acc + (parseFloat(inv.power) || 0), 0);
@@ -157,13 +174,23 @@ export default function Dashboard() {
             <h1 className={styles.pageTitle}>Bem-vindo, Renato</h1>
             <Sun className={styles.animatedSun} size={28} />
           </div>
-          <a 
-            href="/api/history/download" 
-            target="_blank"
-            className={styles.downloadCsvButton}
-          >
-            Baixar Histórico (CSV)
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input 
+              type="date" 
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className={styles.datePicker}
+              max={new Date(new Date().getTime() - (3 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+            />
+            <a 
+              href="/api/history/download" 
+              target="_blank"
+              className={styles.downloadCsvButtonMini}
+              title="Baixar Histórico (CSV)"
+            >
+              CSV
+            </a>
+          </div>
         </header>
 
         <div className={styles.heroCard}>
