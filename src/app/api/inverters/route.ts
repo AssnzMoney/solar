@@ -207,6 +207,8 @@ export async function GET() {
             // Verifica se a API limitou nosso acesso
             if (gwData.error_code === 10012) {
               console.warn("Growatt API limitou o acesso (error_frequently_access). Usando dados velhos do banco se existirem.");
+              // Aplica o backoff de 5 minutos mesmo no erro, para não ficar martelando a API
+              growattExpiration = nowTime + (5 * 60 * 1000);
               // Não joga erro, vai usar os dados antigos que já estão no Supabase
             } else {
               const plants = gwData.data?.plants || [];
