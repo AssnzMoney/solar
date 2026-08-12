@@ -220,7 +220,6 @@ export async function GET() {
                 const powerKw = (parseFloat(rawPower) / 1000).toFixed(1);
                 const gwId = `GW-${p.plant_id || p.id}`;
                 const oldData = dbInvertersFallback?.find((inv: any) => inv.id === gwId);
-                console.log(`[DEBUG] Growatt oldData for ${gwId}:`, JSON.stringify(oldData));
                 let todayEnergy = oldData ? (oldData.generation_today || "0.0") : "0.0";
                 let monthEnergy = oldData ? (oldData.generation_month || "0.0") : "0.0";
                 let totalEnergy = p.e_total || p.total_energy || (oldData ? oldData.generation_total : "0.0");
@@ -287,9 +286,6 @@ export async function GET() {
     let justSavedHistory = false;
     
     for (const inv of realInvertersData) {
-      if (inv.id === 'GW-2639228') {
-        console.log("Upserting GW-2639228 with:", JSON.stringify(inv));
-      }
       await supabase.from('inverters').upsert({
         id: inv.id,
         plant_name: inv.plant_name,
